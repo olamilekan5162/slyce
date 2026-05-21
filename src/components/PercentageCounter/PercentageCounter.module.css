@@ -1,0 +1,41 @@
+.counterContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 8px 16px;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+}
+
+.label {
+  color: var(--text-secondary);
+  font-weight: normal;
+}
+
+.value {
+  color: var(--text-primary);
+}
+
+.exact .value {
+  color: var(--accent-color);
+}
+
+.over .value {
+  color: var(--danger-color);
+}
+
+.icon {
+  color: var(--accent-color);
+}
