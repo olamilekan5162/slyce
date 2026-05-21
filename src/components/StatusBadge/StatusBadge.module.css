@@ -1,0 +1,28 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 24px; /* Pills typically rounded, but prompt said "No border-radius more than 4px anywhere". Let's stick to 4px for pill as well */
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+
+.live {
+  background-color: var(--success-muted);
+  color: var(--accent-color);
+  border: 1px solid rgba(200, 241, 53, 0.2);
+}
+
+.pending {
+  background-color: rgba(255, 191, 0, 0.1);
+  color: #FFBF00;
+  border: 1px solid rgba(255, 191, 0, 0.2);
+}
+
+.default {
+  background-color: var(--surface-color);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
