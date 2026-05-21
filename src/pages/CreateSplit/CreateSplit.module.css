@@ -1,0 +1,206 @@
+.createSplit {
+  padding: 48px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.wizardContainer {
+  width: 100%;
+  max-width: 800px;
+}
+
+.stepIndicator {
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  margin-bottom: 32px;
+  text-align: center;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+.formGroup {
+  margin-bottom: 32px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radioCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background-color: var(--surface-color);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.radioCard input[type="radio"] {
+  width: auto;
+  margin-top: 4px;
+}
+
+.radioSelected {
+  border-color: var(--accent-color);
+}
+
+.radioContent strong {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.radioContent p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.nestedInput {
+  margin: -4px 0 16px 40px;
+}
+
+.currencyInput {
+  display: flex;
+  align-items: center;
+  background-color: #0D0D0D;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.currencyPrefix {
+  padding: 0 16px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  border-right: 1px solid var(--border-color);
+}
+
+.currencyInput input {
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.currencyInput input:focus {
+  border: none;
+  padding: 12px;
+}
+
+.currencyInput:focus-within {
+  border-color: var(--accent-color);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.addBtn {
+  margin-top: 16px;
+}
+
+.summaryCard {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  margin-bottom: 32px;
+}
+
+.summarySection {
+  padding: 32px;
+}
+
+.summarySection:first-child {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.summarySection h3 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.summaryDesc {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.summaryMeta {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: var(--bg-color);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.metaLabel {
+  color: var(--text-secondary);
+}
+
+.reviewTable {
+  width: 100%;
+}
+
+.reviewTable th {
+  padding: 0 0 16px 0;
+}
+
+.reviewTable td {
+  padding: 16px 0;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.checkboxLabel input {
+  width: auto;
+  margin-top: 4px;
+}
+
+.checkboxText {
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.submitBtn {
+  flex: 1;
+  max-width: 300px;
+}
+
+@media (max-width: 600px) {
+  .actions {
+    flex-direction: column-reverse;
+    gap: 16px;
+  }
+  
+  .submitBtn {
+    max-width: none;
+  }
+}
