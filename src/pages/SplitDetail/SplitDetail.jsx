@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Copy, Check, Clock } from 'lucide-react';
-import { splitDetail } from '../../data/dummy';
+import { useParams } from 'react-router-dom';
+import { useSplits } from '../../hooks/useSplits';
+import { useSplitActions } from '../../hooks/useSplitActions';
 import StatusBadge from '../../components/StatusBadge/StatusBadge';
 import Modal from '../../components/Modal/Modal';
 import styles from './SplitDetail.module.css';
 
-const SplitDetail = ({ id }) => {
-  // Always use the dummy detail regardless of ID for this prototype
-  const split = splitDetail;
+const SplitDetail = () => {
+  const { id } = useParams();
+  const { splits, loading, refetch } = useSplits();
+  const { distribute } = useSplitActions();
+  
+  const split = splits?.find(s => s.id === id);
   
   const [isDistributeOpen, setIsDistributeOpen] = useState(false);
-  const [distributeAmount, setDistributeAmount] = useState('');
+  const [isDistributing, setIsDistributing] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(split.splitAddress);
@@ -22,20 +27,36 @@ const SplitDetail = ({ id }) => {
     toast("Opening Sui Explorer...", { icon: "↗" });
   };
 
-  const handleDistribute = () => {
-    if (!distributeAmount || isNaN(distributeAmount) || Number(distributeAmount) <= 0) {
-      toast.error("Enter a valid amount");
+  const handleDistribute = async () => {
+    if (!split || !split.initiatorCapId) {
+      toast.error("You don't have permission to distribute");
       return;
     }
 
-    setIsDistributeOpen(false);
-    toast.loading("Executing distribution...", { id: 'dist' });
+    setIsDistributing(true);
+    toast.loading("Executing distribution on-chain...", { id: 'dist' });
     
-    setTimeout(() => {
-      toast.success(`$${distributeAmount} distributed to ${split.recipients.length} recipients in one transaction`, { id: 'dist' });
-      setDistributeAmount('');
-    }, 1500);
+    try {
+      await distribute(split.id, split.initiatorCapId);
+      toast.dismiss('dist');
+      toast.success(`Funds distributed to ${split.recipients.length} recipients successfully`);
+      setIsDistributeOpen(false);
+      refetch();
+    } catch (error) {
+      toast.dismiss('dist');
+      toast.error(error.message || "Failed to distribute");
+    } finally {
+      setIsDistributing(false);
+    }
   };
+
+  if (loading) {
+    return <div className={`container ${styles.splitDetail}`}>Loading split details...</div>;
+  }
+
+  if (!split) {
+    return <div className={`container ${styles.splitDetail}`}>Split not found or you don't have access.</div>;
+  }
 
   return (
     <div className={`container ${styles.splitDetail}`}>
@@ -52,9 +73,9 @@ const SplitDetail = ({ id }) => {
       </header>
 
       <div className={styles.addressRow}>
-        <span className={styles.addressLabel}>Split Address</span>
+        <span className={styles.addressLabel}>Split Object ID</span>
         <div className={styles.addressBox}>
-          <span className="monospace-numbers">{split.splitAddress}</span>
+          <span className="monospace-numbers">{split.id}</span>
           <button className={styles.copyBtn} onClick={handleCopy} aria-label="Copy address">
             <Copy size={16} />
           </button>
@@ -101,34 +122,13 @@ const SplitDetail = ({ id }) => {
           </section>
 
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Payment History</h2>
+            <h2 className={styles.sectionTitle}>Balance & History</h2>
             <div className={styles.tableCard}>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Note</th>
-                    <th>Status</th>
-                    <th>Tx</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {split.history.map((tx, i) => (
-                    <tr key={i}>
-                      <td>{tx.date}</td>
-                      <td className="monospace-numbers">${tx.amount.toFixed(2)}</td>
-                      <td>{tx.note}</td>
-                      <td>{tx.status}</td>
-                      <td>
-                        <button className={styles.txLink} onClick={handleExternalLink}>
-                          {tx.tx}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div style={{ padding: '20px' }}>
+                <p><strong>Current Balance:</strong> <span className="monospace-numbers">{split.balance} SUI</span></p>
+                <p><strong>Total Distributed:</strong> <span className="monospace-numbers">{split.totalDistributed} SUI</span></p>
+                <p className="text-muted" style={{marginTop: '10px', fontSize: '0.9rem'}}>Detailed transaction history will be available soon.</p>
+              </div>
             </div>
           </section>
         </div>
@@ -162,37 +162,30 @@ const SplitDetail = ({ id }) => {
       >
         <div className={styles.modalContent}>
           <div className={styles.formGroup}>
-            <label>Amount to distribute (USDC)</label>
-            <div className={styles.currencyInput}>
-              <span>$</span>
-              <input 
-                type="number" 
-                className="monospace-numbers"
-                placeholder="0.00"
-                value={distributeAmount}
-                onChange={(e) => setDistributeAmount(e.target.value)}
-                autoFocus
-              />
-            </div>
+            <p>You are about to distribute the entire current balance of <strong>{split.balance} SUI</strong> to all recipients.</p>
           </div>
 
           <div className={styles.previewSection}>
             <h4 className={styles.previewTitle}>Distribution Preview</h4>
             <div className={styles.previewList}>
               {split.recipients.map((rec, i) => {
-                const amount = distributeAmount ? (Number(distributeAmount) * (rec.share / 100)) : 0;
+                const amount = split.balance ? (Number(split.balance) * (rec.share / 100)) : 0;
                 return (
                   <div key={i} className={styles.previewItem}>
                     <span>{rec.name.split(' ')[0]} will receive</span>
-                    <span className="monospace-numbers text-accent">${amount.toFixed(2)}</span>
+                    <span className="monospace-numbers text-accent">{amount.toFixed(2)} SUI</span>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          <button className={`btn-primary ${styles.confirmBtn}`} onClick={handleDistribute}>
-            Confirm Distribution
+          <button 
+            className={`btn-primary ${styles.confirmBtn}`} 
+            onClick={handleDistribute}
+            disabled={isDistributing || split.balance <= 0}
+          >
+            {isDistributing ? 'Executing...' : 'Confirm Distribution'}
           </button>
         </div>
       </Modal>

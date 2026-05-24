@@ -4,10 +4,12 @@ import { UserPlus, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import RecipientRow from '../../components/RecipientRow/RecipientRow';
 import PercentageCounter from '../../components/PercentageCounter/PercentageCounter';
+import { useCreateSplit } from '../../hooks/useCreateSplit';
 import styles from './CreateSplit.module.css';
 
 const CreateSplit = () => {
   const navigate = useNavigate();
+  const { createSplit } = useCreateSplit();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -67,7 +69,7 @@ const CreateSplit = () => {
     setStep(3);
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!confirmed) {
       toast.error('Please confirm the agreement');
       return;
@@ -76,12 +78,29 @@ const CreateSplit = () => {
     setIsSubmitting(true);
     toast.loading("Creating your split on-chain...", { id: 'create-toast' });
     
-    setTimeout(() => {
+    try {
+      const res = await createSplit({
+        name: details.name,
+        description: details.description,
+        recipients,
+        distributionRule: details.distribution,
+        thresholdAmount: details.threshold
+      });
+      
       toast.dismiss('create-toast');
       toast.success("Split created! Invitations sent to all recipients.");
-      // Navigate to a dummy detail view
-      navigate('/splits/split-001');
-    }, 2000);
+      
+      const event = res.events?.find(e => e.type.includes('SplitCreatedEvent'));
+      if (event && event.parsedJson) {
+        navigate(`/splits/${event.parsedJson.split_id}`);
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      toast.dismiss('create-toast');
+      toast.error(error.message || "Failed to create split");
+      setIsSubmitting(false);
+    }
   };
 
   return (
