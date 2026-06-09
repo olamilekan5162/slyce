@@ -1,28 +1,24 @@
-import { useSignAndExecuteTransaction } from "@mysten/dapp-kit-react";
 import { useNetworkVariable } from "../config/networkConfig";
 import { Transaction } from "@mysten/sui/transactions";
 
 export const useSplitActions = () => {
   const slycePackageId = useNetworkVariable("slycePackageId");
-  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const dAppKit = useDAppKit();
 
   const distribute = async (splitId, initiatorCapId) => {
     if (!splitId || !initiatorCapId) throw new Error("Missing parameters");
 
     const tx = new Transaction();
-    
+
     tx.moveCall({
       target: `${slycePackageId}::slyce::distribute`,
-      typeArguments: ['0x2::sui::SUI'],
-      arguments: [
-        tx.object(splitId),
-        tx.object(initiatorCapId)
-      ],
+      typeArguments: ["0x2::sui::SUI"],
+      arguments: [tx.object(splitId), tx.object(initiatorCapId)],
     });
 
-    return await signAndExecuteTransaction({
+    return await dAppKit.signAndExecuteTransaction({
       transaction: tx,
-      options: { showEvents: true, showEffects: true }
+      options: { showEvents: true, showEffects: true },
     });
   };
 
@@ -33,16 +29,13 @@ export const useSplitActions = () => {
 
     tx.moveCall({
       target: `${slycePackageId}::slyce::confirm_share`,
-      typeArguments: ['0x2::sui::SUI'],
-      arguments: [
-        tx.object(splitId),
-        tx.object(recipientCapId)
-      ],
+      typeArguments: ["0x2::sui::SUI"],
+      arguments: [tx.object(splitId), tx.object(recipientCapId)],
     });
 
-    return await signAndExecuteTransaction({
+    return await dAppKit.signAndExecuteTransaction({
       transaction: tx,
-      options: { showEvents: true, showEffects: true }
+      options: { showEvents: true, showEffects: true },
     });
   };
 

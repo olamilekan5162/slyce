@@ -17,6 +17,7 @@ import ConfirmShare from "./pages/ConfirmShare/ConfirmShare";
 import NotFound from "./pages/NotFound/NotFound";
 import { dAppKit, RegisterEnokiWallets } from "./config/dapp-kit";
 import { DAppKitProvider } from "@mysten/dapp-kit-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const Layout = () => {
   const location = useLocation();
@@ -68,12 +69,15 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const queryClient = new QueryClient();
   return (
     <>
-      <DAppKitProvider dAppKit={dAppKit}>
-        <RegisterEnokiWallets />
-        <RouterProvider router={router} />;
-      </DAppKitProvider>
+      <QueryClientProvider client={queryClient}>
+        <DAppKitProvider dAppKit={dAppKit}>
+          <RegisterEnokiWallets />
+          <RouterProvider router={router} />;
+        </DAppKitProvider>
+      </QueryClientProvider>
     </>
   );
 }
