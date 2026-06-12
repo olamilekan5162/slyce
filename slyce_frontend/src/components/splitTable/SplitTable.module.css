@@ -1,0 +1,221 @@
+/* Transactions */
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.sectionHeader h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/*
+   TOOLBAR
+ */
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.searchWrapper {
+  flex: 1;
+  max-width: 320px;
+}
+
+.searchInput {
+  width: 100%;
+  height: 46px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+}
+
+.searchInput::placeholder {
+  color: #9ca3af;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filterGroup span {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.select {
+  height: 46px;
+  min-width: 140px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0 14px;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/*
+   TABLE HEADER
+*/
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.headerAmount {
+  text-align: right;
+}
+
+/* =========================================
+   TRANSACTIONS LIST
+========================================= */
+
+.transactionsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.transactionItem {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.transactionItem:last-child {
+  border-bottom: none;
+}
+
+.txLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.txAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 16px;
+}
+
+.txAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.txInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.txName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.txCategory {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.txDate {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.txAmountWrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.txRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.txAmountPos {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3e9b8f;
+}
+
+.txAmountNeg {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* =========================================
+   PAGINATION
+========================================= */
+/* 
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.pageBtn {
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pageNumbers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pageNumber {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.activePage {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+} */

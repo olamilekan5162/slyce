@@ -1,0 +1,74 @@
+.dashboard {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.overview {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+}
+
+.statsCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.withdraw {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardLabel {
+  font-size: 13px;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.balanceAmount {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.statsLabel {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: bold;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.statRow h3 {
+  font-size: 13px;
+  color: var(--text-accent);
+  font-weight: 500;
+}
+
+.statRow p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 700;
+}

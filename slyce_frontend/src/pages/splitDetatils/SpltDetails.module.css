@@ -1,0 +1,355 @@
+.dashboard {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.card {
+  padding: 36px 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-bottom: 32px;
+}
+
+/* Pie Chart */
+
+.pieChartContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.donutWrapper {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #3e9b8f 0deg 45deg,
+    #7cd4d5 45deg 230deg,
+    #dfbc9f 230deg 260deg,
+    #645f6e 260deg 360deg
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donutInner {
+  width: 160px;
+  height: 160px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.donutAmount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.donutChange {
+  font-size: 12px;
+  color: #3e9b8f;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* Tokens */
+.tokensList {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-right: 20px;
+  gap: 20px;
+}
+
+.tokenItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.tokenItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tokenLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tokenIcon {
+  width: 32px;
+  height: 32px;
+}
+
+.tokenIcon.sui {
+  background-color: #318e84;
+}
+.tokenIcon.usdc {
+  background-color: #0075ff;
+}
+.tokenIcon.btc {
+  background-color: #ff9500;
+}
+
+.tokenInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tokenSymbol {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.tokenName {
+  font-size: 12px;
+  color: var(--text-accent);
+}
+
+.tokenRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.tokenFiat {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.tokenAmount {
+  font-size: 12px;
+  color: var(--text-accent);
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-secondary, #201f24);
+  letter-spacing: -0.01em;
+}
+
+.menuBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.menuBtn:hover {
+  background: #f3f4f6;
+}
+
+/* ── Count label ── */
+.countLabel {
+  font-size: 13px;
+  color: var(--text-accent, #696868);
+  font-weight: 400;
+  margin: 0 0 12px;
+}
+
+/* ── Progress bar ── */
+.progressTrack {
+  height: 28px;
+  background: var(--bg-primary, #f8f4f0);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.progressFill {
+  height: 100%;
+  background: #2e7d6e;
+  border-radius: 8px;
+  transition: width 0.4s ease;
+}
+
+/* ── Meta row ── */
+.metaRow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.divider {
+  width: 1px;
+  background: var(--border-color, #e5e7eb);
+  margin: 0 24px;
+  align-self: stretch;
+}
+
+.metaLabel {
+  font-size: 12px;
+  color: var(--text-accent, #696868);
+  font-weight: 400;
+}
+
+.metaValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary, #201f24);
+}
+
+.address {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary, #201f24);
+  word-break: break-all;
+}
+
+/* Left border accent on first meta item */
+.metaItem:first-child {
+  border-left: 3px solid #2e7d6e;
+  padding-left: 10px;
+}
+
+/* ── Collaborators box ── */
+
+.collaboratorsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.collaboratorsTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary, #201f24);
+}
+
+.seeAllBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-accent, #696868);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  font-family: inherit;
+}
+
+.seeAllBtn:hover {
+  color: var(--text-secondary, #201f24);
+}
+
+/* ── Collaborator list ── */
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.rowBorder {
+  border-bottom: 1px solid #e9e5e0;
+}
+
+.rowLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Avatar ── */
+.rowLeft img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.rowName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary, #201f24);
+}
+
+/* ── Row right ── */
+.rowRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.percentage {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary, #201f24);
+}
+
+.status {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.statusConfirmed {
+  color: var(--text-accent, #696868);
+}
+
+.statusPending {
+  color: var(--text-accent, #696868);
+}

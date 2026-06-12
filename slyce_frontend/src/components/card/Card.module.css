@@ -1,0 +1,19 @@
+.card {
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.cardDark {
+  background-color: var(--bg-secondary);
+  color: #ffffff;
+}
+
+.cardCream {
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+}
+
+.cardLight {
+  background-color: #ffffff;
+  color: var(--text-secondary);
+}
