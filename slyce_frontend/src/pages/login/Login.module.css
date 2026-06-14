@@ -1,0 +1,200 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  font-family: var(--sans);
+  gap: 56px;
+  background-color: #f8f4f0;
+}
+
+/* Left Column Styling */
+.leftColumn {
+  flex: 1.1;
+  background-color: #1a191e;
+  margin: 20px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.logo {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  align-self: flex-start;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.leftTextContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 10;
+  max-width: 500px;
+}
+
+.leftHeading {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.leftDescription {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+}
+
+/* Right Column Styling */
+.rightColumn {
+  flex: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #f8f4f0;
+}
+
+.card {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cardHeading {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #1a191e;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+}
+
+.slushButton {
+  background-color: #1a191e;
+  color: #fff;
+  border: 1px solid #1a191e;
+  padding: 0.95rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slushButton:hover {
+  background-color: #2b2a30;
+}
+
+.slushButton:active {
+  transform: translateY(1px);
+}
+
+/* Divider styling */
+.dividerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem 0;
+  gap: 1rem;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background-color: #e2e8f0;
+}
+
+.dividerText {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #a0aec0;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Social Buttons */
+.socialButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.socialButton {
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  padding: 0.85rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #2d3748;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.socialButton:hover {
+  background-color: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.socialIcon {
+  flex-shrink: 0;
+}
+
+/* Legal text */
+.legalText {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #718096;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.legalLink {
+  font-weight: 600;
+  color: #2d3748;
+  cursor: pointer;
+}
+
+.legalLink:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .leftColumn {
+    display: none; /* Hide illustrative column on tablet/mobile for usability */
+  }
+
+  .rightColumn {
+    flex: 1;
+    padding: 1.5rem;
+  }
+
+  .card {
+    padding: 2.5rem 2rem;
+  }
+}

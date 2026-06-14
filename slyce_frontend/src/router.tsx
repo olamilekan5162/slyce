@@ -7,9 +7,11 @@ import SplitDetails from "./pages/splitDetatils/SplitDetails";
 import Transactions from "./pages/transactions/Transactions";
 import Profile from "./pages/profile/Profile";
 import AddSplit from "./pages/addSplit/AddSplit";
+import Login from "./pages/login/Login";
 
 const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
+  { path: "/login", element: <Login /> },
   {
     path: "/app",
     element: <App />,
