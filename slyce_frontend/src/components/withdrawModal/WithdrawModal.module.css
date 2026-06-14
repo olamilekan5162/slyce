@@ -1,0 +1,190 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.textInput {
+  width: 100%;
+  height: 46px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 14px;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.textInput:focus {
+  border-color: #2e7d6e;
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.checkboxInput {
+  width: 16px;
+  height: 16px;
+  accent-color: #2e7d6e;
+  cursor: pointer;
+}
+
+.tokensSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tokensList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.tokenRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border: 1px solid #f3f4f6;
+  border-radius: 10px;
+  background-color: #f9fafb;
+}
+
+.tokenRowLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tokenIconWrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+.tokenIcon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.sui {
+  background-color: #0f5c53;
+}
+
+.usdc {
+  background-color: #0075ff;
+}
+
+.btc {
+  background-color: #ff9500;
+}
+
+.tokenTextStack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.tokenSymbol {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.tokenName {
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1;
+}
+
+.tokenRowRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.balanceStack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.tokenAmount {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.tokenValue {
+  font-size: 10px;
+  color: #6b7280;
+  line-height: 1;
+}
+
+.amountInput {
+  width: 90px;
+  height: 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 13px;
+  outline: none;
+  text-align: right;
+  background-color: #ffffff;
+}
+
+.amountInput:focus:not(:disabled) {
+  border-color: #2e7d6e;
+}
+
+.amountInput:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.submitBtn {
+  width: 100%;
+  height: 48px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 10px;
+}

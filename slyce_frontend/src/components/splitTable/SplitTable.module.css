@@ -1,5 +1,3 @@
-/* Transactions */
-
 .sectionHeader {
   display: flex;
   justify-content: space-between;
@@ -12,10 +10,6 @@
   font-weight: 600;
   color: var(--text-secondary);
 }
-
-/*
-   TOOLBAR
- */
 
 .toolbar {
   display: flex;
@@ -66,10 +60,6 @@
   cursor: pointer;
 }
 
-/*
-   TABLE HEADER
-*/
-
 .tableHeader {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
@@ -85,10 +75,6 @@
 .headerAmount {
   text-align: right;
 }
-
-/* =========================================
-   TRANSACTIONS LIST
-========================================= */
 
 .transactionsList {
   display: flex;
@@ -177,45 +163,8 @@
   color: #111827;
 }
 
-/* =========================================
-   PAGINATION
-========================================= */
-/* 
-.pagination {
+.tableCard {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 32px;
+  flex-direction: column;
+  min-height: 600px;
 }
-
-.pageBtn {
-  height: 42px;
-  padding: 0 18px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  background: #fff;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.pageNumbers {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pageNumber {
-  width: 42px;
-  height: 42px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  background: #fff;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.activePage {
-  background: #111827;
-  color: #fff;
-  border-color: #111827;
-} */

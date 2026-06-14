@@ -1,6 +1,18 @@
+import type { ButtonHTMLAttributes } from "react";
 import styles from "./Button.module.css";
 
-const Button = ({ className, variant, size, children, ...props }: any) => {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "unstyled";
+  size?: "sm" | "md" | "lg";
+}
+
+const Button = ({
+  className,
+  variant = "primary",
+  size = "md",
+  children,
+  ...props
+}: ButtonProps) => {
   const base = styles.button;
 
   const variants = {
@@ -8,6 +20,7 @@ const Button = ({ className, variant, size, children, ...props }: any) => {
     secondary: styles.secondary,
     ghost: styles.ghost,
     danger: styles.danger,
+    unstyled: styles.unstyled,
   };
 
   const sizes = {

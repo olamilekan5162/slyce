@@ -1,12 +1,20 @@
 .dashboard {
   width: 100%;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .pageTitle {
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 32px;
   color: #111827;
 }
 
@@ -15,13 +23,18 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  margin-bottom: 56px;
+}
+
+.statsCard {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .cardLabel {
   font-size: 13px;
   color: var(--text-primary);
-  margin-bottom: 8px;
 }
 
 .balanceAmount {
@@ -30,14 +43,9 @@
   letter-spacing: -0.5px;
 }
 
-.statsCard {
-  padding: 28px 24px;
-}
-
 .statsLabel {
   font-size: 13px;
   color: var(--text-secondary);
-  margin-bottom: 8px;
 }
 
 .statsAmount {
@@ -50,7 +58,7 @@
 /* Main Content Row */
 .mainRow {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 56px;
 }
 
@@ -79,6 +87,8 @@
   color: var(--text-accent);
   text-decoration: none;
   font-weight: 500;
+  display: flex;
+  align-items: center;
 }
 
 /* Recent Split */
@@ -90,7 +100,6 @@
 
 .creamCard {
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
   gap: 20px;
@@ -158,134 +167,4 @@
   font-size: 13px;
   font-weight: 600;
   color: #111827;
-}
-
-.rightColumn {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  height: fit-content;
-}
-
-/* Pie Chart */
-
-.pieChartContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.donutWrapper {
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: conic-gradient(
-    #3e9b8f 0deg 45deg,
-    #7cd4d5 45deg 230deg,
-    #dfbc9f 230deg 260deg,
-    #645f6e 260deg 360deg
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.donutInner {
-  width: 160px;
-  height: 160px;
-  background-color: #ffffff;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.donutAmount {
-  font-size: 24px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.donutChange {
-  font-size: 12px;
-  color: #3e9b8f;
-  font-weight: 500;
-  margin-top: 4px;
-}
-
-/* Tokens */
-.tokensList {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.tokenItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f3f4f6;
-}
-.tokenItem:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.tokenLeft {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.tokenIcon {
-  width: 32px;
-  height: 32px;
-}
-
-.tokenIcon.sui {
-  background-color: #318e84;
-}
-.tokenIcon.usdc {
-  background-color: #0075ff;
-}
-.tokenIcon.btc {
-  background-color: #ff9500;
-}
-
-.tokenInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.tokenSymbol {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.tokenName {
-  font-size: 12px;
-  color: var(--text-accent);
-}
-
-.tokenRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
-
-.tokenFiat {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.tokenAmount {
-  font-size: 12px;
-  color: var(--text-accent);
 }

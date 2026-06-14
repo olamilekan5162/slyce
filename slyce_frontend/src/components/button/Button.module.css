@@ -5,7 +5,7 @@
   border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -89,4 +89,13 @@
   opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
+}
+
+.unstyled {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+  transition: none;
 }

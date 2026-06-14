@@ -1,24 +1,38 @@
+import { useState } from "react";
 import { PlusIcon, MoreHorizontal, Circle } from "lucide-react";
 import styles from "./Splits.module.css";
 import Button from "../../components/button/Button";
 import { savingsPots } from "../../lib/mockData";
 import Card from "../../components/card/Card";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../../components/pagination/Pagination";
+
 const Splits = () => {
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  const totalPages = Math.ceil(savingsPots.length / itemsPerPage) || 1;
+  const displayedPots = savingsPots.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className={styles.dashboard}>
       <div className={styles.sectionHeader}>
         <h1 className={styles.pageTitle}>Splits</h1>
-        <Button variant="primary" className={styles.actionBtn}>
+        <Button
+          variant="primary"
+          className={styles.actionBtn}
+          onClick={() => navigate("/app/splits/new")}
+        >
           <PlusIcon />
           Add new split
         </Button>
       </div>
 
       <div className={styles.cardsGrid}>
-        {savingsPots.map((pot) => {
+        {displayedPots.map((pot) => {
           const progress = pot.confirmedCollaborators / pot.totalCollaborators;
 
           return (
@@ -69,6 +83,14 @@ const Splits = () => {
             </Card>
           );
         })}
+      </div>
+
+      <div className={styles.paginationWrapper}>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

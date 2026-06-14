@@ -1,13 +1,29 @@
-import { DollarSign } from "lucide-react";
+import { ChevronRight, DollarSign, Plus } from "lucide-react";
 import Card from "../../components/card/Card";
+import Button from "../../components/button/Button";
 import styles from "./Dashboard.module.css";
 import TransactionTable from "../../components/traansactionTable/TransactionTable";
 import { tokens, transactions } from "../../lib/mockData";
+import TokensCard from "../../components/tokensCard/TokensCard";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   return (
     <div className={styles.dashboard}>
-      <h1 className={styles.pageTitle}>Overview</h1>
+      <div className={styles.headerRow}>
+        <h1 className={styles.pageTitle}>Overview</h1>
+        <Button
+          size="md"
+          variant="primary"
+          className={styles.addSplitBtn}
+          onClick={() => navigate("/app/splits/new")}
+        >
+          <Plus size={16} />
+          <span>Add New Split</span>
+        </Button>
+      </div>
 
       {/* Overview Section */}
       <div className={styles.overviewGrid}>
@@ -35,7 +51,7 @@ const Dashboard = () => {
             <div className={styles.sectionHeader}>
               <h3>Recent Split</h3>
               <a href="#" className={styles.seeAllLink}>
-                See Details ›
+                See Details <ChevronRight size={14} />
               </a>
             </div>
 
@@ -77,46 +93,7 @@ const Dashboard = () => {
         </div>
 
         {/* Right Column */}
-        <Card className={styles.rightColumn}>
-          <div className={styles.pieChartContainer}>
-            <div className={styles.donutWrapper}>
-              <div className={styles.donutInner}>
-                <span className={styles.donutAmount}>$338</span>
-                <span className={styles.donutChange}>+$975</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.sectionHeader}>
-            <h3>Tokens</h3>
-          </div>
-
-          <div className={styles.tokensList}>
-            {tokens.map((token) => (
-              <div key={token.id} className={styles.tokenItem}>
-                <div className={styles.tokenLeft}>
-                  <img
-                    src={token.iconUrl}
-                    alt={token.symbol}
-                    className={styles.tokenIcon}
-                  />
-                  <div className={styles.tokenInfo}>
-                    <div className={styles.tokenSymbol}>{token.symbol}</div>
-                    <div className={styles.tokenName}>{token.name}</div>
-                  </div>
-                </div>
-                <div className={styles.tokenRight}>
-                  <div className={styles.tokenFiat}>
-                    ${token.fiatValue.toFixed(2)}
-                  </div>
-                  <div className={styles.tokenAmount}>
-                    {`${token.amount} ${token.symbol}`}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+        <TokensCard tokens={tokens} />
       </div>
     </div>
   );

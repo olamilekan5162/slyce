@@ -6,6 +6,7 @@ import Splits from "./pages/splits/Splits";
 import SplitDetails from "./pages/splitDetatils/SplitDetails";
 import Transactions from "./pages/transactions/Transactions";
 import Profile from "./pages/profile/Profile";
+import AddSplit from "./pages/addSplit/AddSplit";
 
 const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -17,6 +18,8 @@ const router = createBrowserRouter([
       { path: "transactions", element: <Transactions /> },
       { path: "profile", element: <Profile /> },
       { path: "splits", element: <Splits /> },
+      { path: "splits/new", element: <AddSplit /> },
+      { path: "splits/:id/edit", element: <AddSplit /> },
       { path: "splits/:id", element: <SplitDetails /> },
     ],
   },

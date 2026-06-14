@@ -1,8 +1,20 @@
+import { useState } from "react";
 import Card from "../card/Card";
 import styles from "./SplitTable.module.css";
-const SplitTable = ({ splits }) => {
+import Pagination from "../pagination/Pagination";
+import type { Transaction } from "../../lib/types";
+
+const SplitTable = ({ splits }: { splits: Transaction[] }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(splits.length / itemsPerPage) || 1;
+  const displayedSplits = splits.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
   return (
-    <Card variant="light">
+    <Card variant="light" className={styles.tableCard}>
       <div className={styles.sectionHeader}>
         <h3>My Splits</h3>
         <div className={styles.toolbar}>
@@ -31,7 +43,7 @@ const SplitTable = ({ splits }) => {
       </div>
 
       <div className={styles.transactionsList}>
-        {splits.map((split) => (
+        {displayedSplits.map((split: Transaction) => (
           <div key={split.id} className={styles.transactionItem}>
             <div className={styles.txLeft}>
               <div className={styles.txAvatar}>
@@ -59,21 +71,11 @@ const SplitTable = ({ splits }) => {
         ))}
       </div>
 
-      {/* <div className={styles.pagination}>
-        <button className={styles.pageBtn}>‹ Prev</button>
-
-        <div className={styles.pageNumbers}>
-          <button className={styles.pageNumber}>1</button>
-          <button className={`${styles.pageNumber} ${styles.activePage}`}>
-            2
-          </button>
-          <button className={styles.pageNumber}>3</button>
-          <button className={styles.pageNumber}>4</button>
-          <button className={styles.pageNumber}>5</button>
-        </div>
-
-        <button className={styles.pageBtn}>Next ›</button>
-      </div> */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </Card>
   );
 };

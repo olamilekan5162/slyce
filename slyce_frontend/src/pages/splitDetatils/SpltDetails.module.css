@@ -1,87 +1,82 @@
-.dashboard {
+.container {
   width: 100%;
+  display: flex;
   margin: 0 auto;
+  flex-direction: column;
+  gap: 32px;
 }
 
-.sectionHeader {
+.headerRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .pageTitle {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: #111827;
 }
 
-.card {
-  padding: 36px 20px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  margin-bottom: 32px;
+.pageSubtitle {
+  font-size: 14px;
+  color: var(--text-accent);
 }
 
-/* Pie Chart */
-
-.pieChartContainer {
-  flex: 1;
+.headerActions {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  gap: 12px;
 }
 
-.donutWrapper {
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: conic-gradient(
-    #3e9b8f 0deg 45deg,
-    #7cd4d5 45deg 230deg,
-    #dfbc9f 230deg 260deg,
-    #645f6e 260deg 360deg
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 32px;
 }
 
-.donutInner {
-  width: 160px;
-  height: 160px;
-  background-color: #ffffff;
-  border-radius: 50%;
+.leftColumn {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
-.donutAmount {
-  font-size: 24px;
+.tokensCard {
+  width: 100%;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.participantsCard,
+.configCard {
+  padding: 32px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cardHeader h3,
+.configHeader h3 {
+  font-size: 18px;
   font-weight: 700;
   color: #111827;
 }
 
-.donutChange {
-  font-size: 12px;
-  color: #3e9b8f;
-  font-weight: 500;
-  margin-top: 4px;
-}
-
-/* Tokens */
-.tokensList {
-  flex: 1;
+.collaboratorsList {
   display: flex;
   flex-direction: column;
-  padding-right: 20px;
   gap: 20px;
 }
 
-.tokenItem {
+.collaboratorRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -89,267 +84,206 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
-.tokenItem:last-child {
+.collaboratorRow:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
 
-.tokenLeft {
+.collabLeft {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.tokenIcon {
-  width: 32px;
-  height: 32px;
+.avatarCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
 }
 
-.tokenIcon.sui {
-  background-color: #318e84;
-}
-.tokenIcon.usdc {
-  background-color: #0075ff;
-}
-.tokenIcon.btc {
-  background-color: #ff9500;
+.bgAvatarDark {
+  background-color: #1f2937;
+  color: #ffffff;
 }
 
-.tokenInfo {
+.bgAvatarPurple {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+}
+
+.bgAvatarBlue {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.bgAvatarGrey {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.collabInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
-.tokenSymbol {
-  font-size: 13px;
-  font-weight: 600;
+.collabName {
+  font-size: 14px;
+  font-weight: 700;
   color: #111827;
 }
 
-.tokenName {
+.collabAddress {
   font-size: 12px;
   color: var(--text-accent);
 }
 
-.tokenRight {
+.collabRight {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: 4px;
 }
 
-.tokenFiat {
-  font-size: 13px;
-  font-weight: 600;
+.collabShare {
+  font-size: 14px;
+  font-weight: 700;
   color: #111827;
 }
 
-.tokenAmount {
+.collabStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dotConfirmed {
+  background-color: #10b981;
+}
+
+.dotPending {
+  background-color: #f59e0b;
+}
+
+.statusText {
   font-size: 12px;
-  color: var(--text-accent);
+  font-weight: 600;
 }
 
-/* ── Header ── */
-.header {
+.textConfirmed {
+  color: #10b981;
+}
+
+.textPending {
+  color: #f59e0b;
+}
+
+/* Config Setup Card */
+.configHeader {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.titleRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-secondary, #201f24);
-  letter-spacing: -0.01em;
-}
-
-.menuBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 6px;
-  display: flex;
   align-items: center;
 }
 
-.menuBtn:hover {
-  background: #f3f4f6;
+.confirmedBadge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  background-color: #f3f4f6;
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
-/* ── Count label ── */
-.countLabel {
-  font-size: 13px;
-  color: var(--text-accent, #696868);
-  font-weight: 400;
-  margin: 0 0 12px;
+.configDescription {
+  font-size: 14px;
+  color: var(--text-accent);
+  line-height: 1.5;
 }
 
-/* ── Progress bar ── */
 .progressTrack {
-  height: 28px;
-  background: var(--bg-primary, #f8f4f0);
-  border-radius: 8px;
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 20px;
 }
 
 .progressFill {
   height: 100%;
-  background: #2e7d6e;
-  border-radius: 8px;
-  transition: width 0.4s ease;
-}
-
-/* ── Meta row ── */
-.metaRow {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  margin-bottom: 20px;
-}
-
-.metaItem {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
+  background-color: #2e7d6e;
+  border-radius: 4px;
 }
 
 .divider {
-  width: 1px;
-  background: var(--border-color, #e5e7eb);
-  margin: 0 24px;
-  align-self: stretch;
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  margin: 8px 0;
 }
 
-.metaLabel {
-  font-size: 12px;
-  color: var(--text-accent, #696868);
-  font-weight: 400;
+/* Technical Specs */
+.specSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.metaValue {
-  font-size: 14px;
+.specTitle {
+  font-size: 11px;
   font-weight: 700;
-  color: var(--text-secondary, #201f24);
+  color: var(--text-accent);
+  letter-spacing: 0.5px;
 }
 
-.address {
+.specRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.specLabel {
+  font-size: 13px;
+  color: var(--text-accent);
+}
+
+.specValue {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #201f24);
-  word-break: break-all;
+  color: #111827;
 }
 
-/* Left border accent on first meta item */
-.metaItem:first-child {
-  border-left: 3px solid #2e7d6e;
-  padding-left: 10px;
+.engineBadge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2e7d6e;
+  background-color: #e6f4f1;
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
-/* ── Collaborators box ── */
-
-.collaboratorsHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.collaboratorsTitle {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-secondary, #201f24);
-}
-
-.seeAllBtn {
-  background: none;
+.copyAddressBtn {
+  background: transparent;
   border: none;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2e7d6e;
   font-size: 13px;
-  font-weight: 500;
-  color: var(--text-accent, #696868);
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 0;
-  font-family: inherit;
-}
-
-.seeAllBtn:hover {
-  color: var(--text-secondary, #201f24);
-}
-
-/* ── Collaborator list ── */
-.list {
-  display: flex;
-  flex-direction: column;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-}
-
-.rowBorder {
-  border-bottom: 1px solid #e9e5e0;
-}
-
-.rowLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* ── Avatar ── */
-.rowLeft img {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.rowName {
-  font-size: 14px;
   font-weight: 600;
-  color: var(--text-secondary, #201f24);
+  cursor: pointer;
+  outline: none;
 }
 
-/* ── Row right ── */
-.rowRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
-
-.percentage {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-secondary, #201f24);
-}
-
-.status {
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.statusConfirmed {
-  color: var(--text-accent, #696868);
-}
-
-.statusPending {
-  color: var(--text-accent, #696868);
+.copyAddressBtn:hover {
+  opacity: 0.8;
 }

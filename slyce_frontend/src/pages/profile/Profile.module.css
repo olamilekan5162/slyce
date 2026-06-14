@@ -1,13 +1,15 @@
 .dashboard {
   width: 100%;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 }
 
 .pageTitle {
   font-size: 24px;
   font-weight: 700;
   color: var(--text-secondary);
-  margin-bottom: 32px;
 }
 
 .mainContent {
@@ -22,53 +24,125 @@
   gap: 24px;
 }
 
-.statsCard {
+.balanceCard,
+.walletCard {
   flex: 1;
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: space-between;
+  min-height: 180px;
 }
 
-.withdraw {
+.balanceInfo {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .cardLabel {
-  font-size: 13px;
-  color: var(--text-primary);
-  margin-bottom: 10px;
-}
-
-.balanceAmount {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-.statsLabel {
-  font-size: 16px;
-  color: var(--text-secondary);
-  font-weight: bold;
-}
-
-.statRow {
-  display: flex;
-  justify-content: space-between;
-  padding: 5px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.statRow h3 {
   font-size: 13px;
   color: var(--text-accent);
   font-weight: 500;
 }
 
-.statRow p {
-  font-size: 13px;
-  color: var(--text-secondary);
+.balanceAmount {
+  font-size: 36px;
   font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.5px;
+}
+
+.balanceActions {
+  display: flex;
+  gap: 12px;
+}
+
+.walletHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.disconnectLink {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bg-info);
+  cursor: pointer;
+  outline: none;
+}
+
+.disconnectLink:hover {
+  opacity: 0.8;
+}
+
+.walletAddress {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 8px;
+}
+
+.walletFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 16px;
+}
+
+.totalSplitsStack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.splitsCount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.avatarList {
+  display: flex;
+  align-items: center;
+}
+
+.avatarCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: -10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.avatarCircle:first-child {
+  margin-left: 0;
+}
+
+.avatarOrange {
+  background-color: #ffedd5;
+  color: #ea580c;
+}
+
+.avatarBlue {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.avatarPurple {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+}
+
+.avatarGrey {
+  background-color: #f3f4f6;
+  color: #4b5563;
 }

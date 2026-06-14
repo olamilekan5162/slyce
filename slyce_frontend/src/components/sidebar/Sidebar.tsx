@@ -7,7 +7,7 @@ const links = [
   {
     label: "Overview",
     icon: Home,
-    path: "/app/dashboard",
+    path: "/app",
   },
   {
     label: "Transactions",
@@ -40,7 +40,7 @@ export default function Sidebar() {
               <NavLink
                 key={link.path}
                 to={link.path}
-                end={link.path === "/"}
+                end={link.path === "/app"}
                 className={({ isActive }) =>
                   `${styles.navItem} ${isActive ? styles.active : ""}`
                 }
@@ -53,10 +53,16 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <Button size="lg" variant="danger" onClick={() => {}}>
-        <LogOut size={20} />
-        <span>Disconnect</span>
-      </Button>
+      <div className={styles.logout}>
+        <Button
+          variant="unstyled"
+          className={styles.logoutBtn}
+          onClick={() => {}}
+        >
+          <LogOut size={20} />
+          <span>Logout</span>
+        </Button>
+      </div>
     </aside>
   );
 }

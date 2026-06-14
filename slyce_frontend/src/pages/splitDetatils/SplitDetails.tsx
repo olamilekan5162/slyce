@@ -1,177 +1,214 @@
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Copy } from "lucide-react";
 import Button from "../../components/button/Button";
 import Card from "../../components/card/Card";
-import { MoreHorizontal, Circle, ChevronRight } from "lucide-react";
+import TokensCard from "../../components/tokensCard/TokensCard";
 import { tokens } from "../../lib/mockData";
 import styles from "./SpltDetails.module.css";
-const SplitDetails = () => {
+import AddParticipantModal from "../../components/addParticipantModal/AddParticipantModal";
+
+export default function SplitDetails() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
+
   const data = {
-    id: "1",
-    title: "More details",
+    id: id || "1",
+    title: "Project Alpha Royalties",
     confirmedCollaborators: 3,
     totalCollaborators: 4,
-    distributionType: "Manual",
-    splitAddress: "0x12345678911767....23234443",
+    distributionType: "Automated Trigger",
+    splitAddress: "0x7F23...8a9B",
+    creatorAddress: "0x234d...2345",
+    smartContractId: "sc_lyce_9283f12a",
     collaborators: [
       {
         id: "c1",
-        name: "James Thompson",
-        avatar: "https://i.pravatar.cc/150?img=11",
+        name: "Alex Morgan",
+        address: "0x71C5...3B21",
+        avatar: "AM",
         percentage: 40,
-        status: "Pending",
+        status: "Confirmed",
+        avatarColor: styles.bgAvatarDark,
       },
       {
         id: "c2",
-        name: "Pixel Playground",
-        avatar: "PP", // initials fallback
-        percentage: 30,
+        name: "Sarah Jenkins",
+        address: "0x44A5...9F02",
+        avatar: "SJ",
+        percentage: 25,
         status: "Confirmed",
+        avatarColor: styles.bgAvatarPurple,
       },
       {
         id: "c3",
-        name: "Rina Sato",
-        avatar: "https://i.pravatar.cc/150?img=47",
-        percentage: 30,
+        name: "David Kim",
+        address: "0x99B2...1C44",
+        avatar: "DK",
+        percentage: 20,
         status: "Confirmed",
+        avatarColor: styles.bgAvatarBlue,
+      },
+      {
+        id: "c4",
+        name: "Mia Lin",
+        address: "0x22D3...8E11",
+        avatar: "ML",
+        percentage: 15,
+        status: "Pending",
+        avatarColor: styles.bgAvatarGrey,
       },
     ],
   };
 
   const progress = data.confirmedCollaborators / data.totalCollaborators;
-  const shortAddress = data.splitAddress;
+
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(data.splitAddress);
+    alert("Split address copied to clipboard!");
+  };
 
   return (
-    <div className={styles.dashboard}>
-      <div className={styles.sectionHeader}>
-        <h1 className={styles.pageTitle}>Split Title</h1>
-        <Button variant="primary" className={styles.actionBtn}>
-          Edit split
-        </Button>
+    <div className={styles.container}>
+      <div className={styles.headerRow}>
+        <div className={styles.titleArea}>
+          <h1 className={styles.pageTitle}>Split Details</h1>
+          <p className={styles.pageSubtitle}>{data.title}</p>
+        </div>
+
+        <div className={styles.headerActions}>
+          <Button
+            variant="ghost"
+            className={styles.editBtn}
+            onClick={() => navigate(`/app/splits/${data.id}/edit`)}
+          >
+            <span>Edit Split</span>
+          </Button>
+          <Button
+            variant="primary"
+            className={styles.addParticipantBtn}
+            onClick={() => setIsAddParticipantOpen(true)}
+          >
+            <span>Add Participant</span>
+          </Button>
+        </div>
       </div>
 
-      <Card className={styles.card}>
-        <div className={styles.pieChartContainer}>
-          <div className={styles.donutWrapper}>
-            <div className={styles.donutInner}>
-              <span className={styles.donutAmount}>$338</span>
-              <span className={styles.donutChange}>+$975</span>
+      <div className={styles.detailsGrid}>
+        <div className={styles.leftColumn}>
+          <TokensCard tokens={tokens} className={styles.tokensCard} />
+        </div>
+
+        <div className={styles.rightColumn}>
+          <Card variant="light" className={styles.participantsCard}>
+            <div className={styles.cardHeader}>
+              <h3>Participants</h3>
             </div>
-          </div>
-        </div>
 
-        <div className={styles.tokensList}>
-          <h3>Tokens</h3>
+            <div className={styles.collaboratorsList}>
+              {data.collaborators.map((c) => (
+                <div key={c.id} className={styles.collaboratorRow}>
+                  <div className={styles.collabLeft}>
+                    <div className={`${styles.avatarCircle} ${c.avatarColor}`}>
+                      {c.avatar}
+                    </div>
+                    <div className={styles.collabInfo}>
+                      <span className={styles.collabName}>{c.name}</span>
+                      <span className={styles.collabAddress}>{c.address}</span>
+                    </div>
+                  </div>
 
-          {tokens.map((token) => (
-            <div key={token.id} className={styles.tokenItem}>
-              <div className={styles.tokenLeft}>
-                <img
-                  src={token.iconUrl}
-                  alt={token.symbol}
-                  className={styles.tokenIcon}
-                />
-                <div className={styles.tokenInfo}>
-                  <div className={styles.tokenSymbol}>{token.symbol}</div>
-                  <div className={styles.tokenName}>{token.name}</div>
+                  <div className={styles.collabRight}>
+                    <span className={styles.collabShare}>
+                      {c.percentage}% Share
+                    </span>
+                    <div className={styles.collabStatus}>
+                      <span
+                        className={`${styles.statusDot} ${
+                          c.status === "Confirmed"
+                            ? styles.dotConfirmed
+                            : styles.dotPending
+                        }`}
+                      />
+                      <span
+                        className={`${styles.statusText} ${
+                          c.status === "Confirmed"
+                            ? styles.textConfirmed
+                            : styles.textPending
+                        }`}
+                      >
+                        {c.status}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className={styles.tokenRight}>
-                <div className={styles.tokenFiat}>
-                  ${token.fiatValue.toFixed(2)}
-                </div>
-                <div className={styles.tokenAmount}>
-                  {`${token.amount} ${token.symbol}`}
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </Card>
+          </Card>
 
-      <Card className={styles.detailsCard}>
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.titleRow}>
-            <Circle size={12} fill="#2E7D6E" stroke="none" />
-            <span className={styles.title}>{data.title}</span>
-          </div>
-          <button
-            className={styles.menuBtn}
-            onClick={() => {}}
-            aria-label="Options"
-          >
-            <MoreHorizontal size={18} color="#9CA3AF" />
-          </button>
-        </div>
+          <Card variant="light" className={styles.configCard}>
+            <div className={styles.configHeader}>
+              <h3>Configuration Setup</h3>
+              <span className={styles.confirmedBadge}>
+                {data.confirmedCollaborators} / {data.totalCollaborators}{" "}
+                Confirmed
+              </span>
+            </div>
 
-        {/* Collaborator count */}
-        <p className={styles.countLabel}>
-          {data.confirmedCollaborators} / {data.totalCollaborators}{" "}
-          Collaborators Confirmed
-        </p>
+            <p className={styles.configDescription}>
+              Waiting for all participants to confirm the current split ratios
+              before activating.
+            </p>
 
-        {/* Progress bar */}
-        <div className={styles.progressTrack}>
-          <div
-            className={styles.progressFill}
-            style={{ width: `${Math.min(progress * 100, 100)}%` }}
-          />
-        </div>
-
-        {/* Meta row */}
-        <div className={styles.metaRow}>
-          <div className={styles.metaItem}>
-            <span className={styles.metaLabel}>Distribution Type</span>
-            <span className={styles.metaValue}>{data.distributionType}</span>
-          </div>
-          <div className={styles.divider} />
-          <div className={styles.metaItem}>
-            <span className={styles.metaLabel}>Split Address</span>
-            <span className={`${styles.metaValue} ${styles.address}`}>
-              {shortAddress}
-            </span>
-          </div>
-        </div>
-
-        {/* Collaborators section */}
-        <Card variant="cream" className={styles.collaboratorsBox}>
-          <div className={styles.collaboratorsHeader}>
-            <span className={styles.collaboratorsTitle}>Collaborators</span>
-            <button className={styles.seeAllBtn} onClick={() => {}}>
-              See All <ChevronRight size={14} />
-            </button>
-          </div>
-
-          <div className={styles.list}>
-            {data.collaborators.map((c, i) => (
+            <div className={styles.progressTrack}>
               <div
-                key={c.id}
-                className={`${styles.row} ${
-                  i < data.collaborators.length - 1 ? styles.rowBorder : ""
-                }`}
-              >
-                <div className={styles.rowLeft}>
-                  <img src={c.avatar} alt={c.name} />
-                  <span className={styles.rowName}>{c.name}</span>
-                </div>
-                <div className={styles.rowRight}>
-                  <span className={styles.percentage}>{c.percentage}%</span>
-                  <span
-                    className={`${styles.status} ${
-                      c.status === "Confirmed"
-                        ? styles.statusConfirmed
-                        : styles.statusPending
-                    }`}
-                  >
-                    {c.status}
-                  </span>
-                </div>
+                className={styles.progressFill}
+                style={{ width: `${progress * 100}%` }}
+              />
+            </div>
+
+            <hr className={styles.divider} />
+
+            <div className={styles.specSection}>
+              <h4 className={styles.specTitle}>TECHNICAL SPECIFICATIONS</h4>
+
+              <div className={styles.specRow}>
+                <span className={styles.specLabel}>Split Address</span>
+                <button
+                  onClick={handleCopyAddress}
+                  className={styles.copyAddressBtn}
+                >
+                  <span>{data.splitAddress}</span>
+                  <Copy size={14} />
+                </button>
               </div>
-            ))}
-          </div>
-        </Card>
-      </Card>
+
+              <div className={styles.specRow}>
+                <span className={styles.specLabel}>Creator</span>
+                <span className={styles.specValue}>{data.creatorAddress}</span>
+              </div>
+
+              <div className={styles.specRow}>
+                <span className={styles.specLabel}>Distribution Engine</span>
+                <span className={styles.engineBadge}>
+                  {data.distributionType}
+                </span>
+              </div>
+
+              <div className={styles.specRow}>
+                <span className={styles.specLabel}>Smart Contract ID</span>
+                <span className={styles.specValue}>{data.smartContractId}</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <AddParticipantModal
+        isOpen={isAddParticipantOpen}
+        onClose={() => setIsAddParticipantOpen(false)}
+      />
     </div>
   );
-};
-
-export default SplitDetails;
+}
