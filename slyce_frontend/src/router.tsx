@@ -7,11 +7,11 @@ import SplitDetails from "./pages/splitDetatils/SplitDetails";
 import Transactions from "./pages/transactions/Transactions";
 import Profile from "./pages/profile/Profile";
 import AddSplit from "./pages/addSplit/AddSplit";
-import Login from "./pages/login/Login";
+import ConfirmSplit from "./pages/confirmSplit/ConfirmSplit";
 
 const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
-  { path: "/login", element: <Login /> },
+  { path: "/confirm/:id", element: <ConfirmSplit /> },
   {
     path: "/app",
     element: <App />,

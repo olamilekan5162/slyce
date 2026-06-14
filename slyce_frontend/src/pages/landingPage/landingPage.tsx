@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import Button from "../../components/button/Button";
+import LoginModal from "../../components/loginModal/LoginModal";
 import styles from "./landingPage.module.css";
 
 const fadeUpVariant: Variants = {
@@ -19,6 +21,7 @@ const staggerContainer: Variants = {
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   return (
     <div className={styles.container}>
@@ -62,7 +65,7 @@ const LandingPage = () => {
             <Button
               variant="ghost"
               className={styles.navLink}
-              onClick={() => navigate("/login")}
+              onClick={() => setIsLoginOpen(true)}
             >
               Log in
             </Button>
@@ -214,10 +217,14 @@ const LandingPage = () => {
                     <span className={styles.splitAmount}>1,250</span>
                   </div>
                   <div className={styles.splitFlowLines}>
-                    <div className={`${styles.flowLine} ${styles.flowLineLeft}`}>
+                    <div
+                      className={`${styles.flowLine} ${styles.flowLineLeft}`}
+                    >
                       <div className={styles.flowParticle}></div>
                     </div>
-                    <div className={`${styles.flowLine} ${styles.flowLineRight}`}>
+                    <div
+                      className={`${styles.flowLine} ${styles.flowLineRight}`}
+                    >
                       <div className={styles.flowParticle}></div>
                     </div>
                   </div>
@@ -255,9 +262,15 @@ const LandingPage = () => {
               <div className={styles.featureVisual}>
                 <div className={styles.routerVisual}>
                   <div className={styles.tokenPills}>
-                    <span className={`${styles.tokenPill} ${styles.usdc}`}>USDC</span>
-                    <span className={`${styles.tokenPill} ${styles.eth}`}>ETH</span>
-                    <span className={`${styles.tokenPill} ${styles.sol}`}>SOL</span>
+                    <span className={`${styles.tokenPill} ${styles.usdc}`}>
+                      USDC
+                    </span>
+                    <span className={`${styles.tokenPill} ${styles.eth}`}>
+                      ETH
+                    </span>
+                    <span className={`${styles.tokenPill} ${styles.sol}`}>
+                      SOL
+                    </span>
                   </div>
                   <div className={styles.routerHub}>
                     <div className={styles.routerCore}>
@@ -304,19 +317,44 @@ const LandingPage = () => {
                   </div>
                   <pre className={styles.codeBody}>
                     <code>
-                      <span className={styles.codeKeyword}>contract</span> SlyceSplit &#123;<br/>
-                      &nbsp;&nbsp;<span className={styles.codeKeyword}>address</span>[] <span className={styles.codeVar}>payees</span>;<br/>
-                      &nbsp;&nbsp;<span className={styles.codeKeyword}>uint256</span>[] <span className={styles.codeVar}>shares</span>;<br/>
-                      <br/>
-                      &nbsp;&nbsp;<span className={styles.codeKeyword}>function</span> <span className={styles.codeFunc}>splitFunds</span>() <span className={styles.codeKeyword}>public</span> &#123;<br/>
-                      &nbsp;&nbsp;&nbsp;&nbsp;<span className={styles.codeComment}>// Verified Flow</span><br/>
-                      &nbsp;&nbsp;&nbsp;&nbsp;<span className={styles.codeKeyword}>distribute</span>(<span className={styles.codeVar}>payees</span>, <span className={styles.codeVar}>shares</span>);<br/>
-                      &nbsp;&nbsp;&#125;<br/>
+                      <span className={styles.codeKeyword}>contract</span>{" "}
+                      SlyceSplit &#123;
+                      <br />
+                      &nbsp;&nbsp;
+                      <span className={styles.codeKeyword}>address</span>[]{" "}
+                      <span className={styles.codeVar}>payees</span>;<br />
+                      &nbsp;&nbsp;
+                      <span className={styles.codeKeyword}>uint256</span>[]{" "}
+                      <span className={styles.codeVar}>shares</span>;<br />
+                      <br />
+                      &nbsp;&nbsp;
+                      <span className={styles.codeKeyword}>function</span>{" "}
+                      <span className={styles.codeFunc}>splitFunds</span>(){" "}
+                      <span className={styles.codeKeyword}>public</span> &#123;
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      <span className={styles.codeComment}>
+                        // Verified Flow
+                      </span>
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      <span className={styles.codeKeyword}>distribute</span>(
+                      <span className={styles.codeVar}>payees</span>,{" "}
+                      <span className={styles.codeVar}>shares</span>);
+                      <br />
+                      &nbsp;&nbsp;&#125;
+                      <br />
                       &#125;
                     </code>
                   </pre>
                   <div className={styles.verifiedBadge}>
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" className={styles.checkIcon}>
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      className={styles.checkIcon}
+                    >
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                     </svg>
                     <span>Verified Contract</span>
@@ -438,6 +476,12 @@ const LandingPage = () => {
           </Button>
         </div>
       </footer>
+
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onConnect={() => {}}
+      />
     </div>
   );
 };
