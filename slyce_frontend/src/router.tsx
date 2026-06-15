@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import LandingPage from "./pages/landingPage/landingPage";
+import AuthCallback from "./pages/authCallback/AuthCallback";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Splits from "./pages/splits/Splits";
 import SplitDetails from "./pages/splitDetatils/SplitDetails";
@@ -11,6 +12,7 @@ import ConfirmSplit from "./pages/confirmSplit/ConfirmSplit";
 
 const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
+  { path: "/auth/callback", element: <AuthCallback /> },
   { path: "/confirm/:id", element: <ConfirmSplit /> },
   {
     path: "/app",

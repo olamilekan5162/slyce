@@ -477,11 +477,7 @@ const LandingPage = () => {
         </div>
       </footer>
 
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onConnect={() => {}}
-      />
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </div>
   );
 };

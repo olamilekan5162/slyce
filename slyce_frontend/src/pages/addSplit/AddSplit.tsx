@@ -1,58 +1,84 @@
-import React, { useState } from "react";
-import { Trash2, PlusCircle, Check, ChevronDown } from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
+import { Trash2, PlusCircle, Check, ChevronDown, Copy } from "lucide-react";
 import Card from "../../components/card/Card";
 import Button from "../../components/button/Button";
 import styles from "./AddSplit.module.css";
-import { tokens } from "../../lib/mockData";
 import { useParams } from "react-router-dom";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { useSplits } from "../../hooks/useSplits";
+import { useTokens } from "../../hooks/useTokens";
+import type { RecipientForm, RecipientType, TokenOption } from "../../types";
 
-interface Participant {
-  address: string;
-  share: string;
-}
-
-const tokenOptions = [
-  {
-    id: 0,
-    symbol: "ANY",
-    name: "Any Asset",
-    iconUrl: "",
-  },
-  ...tokens,
-];
+const determineType = (value: string): RecipientType => {
+  if (value.startsWith("0x") && value.length > 30) return "address";
+  if (value.includes("@")) return "email";
+  return "contact";
+};
 
 export default function AddSplit() {
   const { id } = useParams();
-  const isEdit = !!id;
-
-  const [splitName, setSplitName] = useState(
-    isEdit ? "Project Alpha Royalties" : "",
-  );
-  const [selectedToken, setSelectedToken] = useState(
-    isEdit
-      ? tokenOptions.find((t) => t.symbol === "USDC") || tokenOptions[0]
-      : tokenOptions[0],
-  );
+  const { createSplit, creating } = useSplits();
+  const [splitName, setSplitName] = useState("");
+  const [selectedToken, setSelectedToken] = useState<TokenOption>({
+    id: "any",
+    symbol: "ANY",
+    name: "Any Asset",
+    iconUrl: "",
+  });
   const [showTokenDropdown, setShowTokenDropdown] = useState(false);
-  const [participants, setParticipants] = useState<Participant[]>(
-    isEdit
-      ? [
-          { address: "0x71C5...3B21", share: "40" },
-          { address: "0x44A5...9F02", share: "25" },
-          { address: "0x99B2...1C44", share: "20" },
-          { address: "0x22D3...8E11", share: "15" },
-        ]
-      : [
-          { address: "0x742d...44e", share: "60" },
-          { address: "", share: "40" },
-        ],
-  );
-  const [distributionEngine, setDistributionEngine] = useState(
-    isEdit ? "Automated Trigger (Smart Contract)" : "Automated Trigger",
-  );
-
+  const [participants, setParticipants] = useState<RecipientForm[]>([]);
+  const [distributionEngine, setDistributionEngine] = useState("");
   const [thresholdValue, setThresholdValue] = useState("");
   const [scheduledInterval, setScheduledInterval] = useState("Weekly");
+  const [createdSplitId, setCreatedSplitId] = useState<string | null>(null);
+  const [invitePasscodes, setInvitePasscodes] = useState<string[]>([]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  const currentAccount = useCurrentAccount();
+  const { tokens: userTokens } = useTokens(currentAccount?.address ?? "");
+  const isEdit = !!id;
+
+  const tokenOptions: TokenOption[] = [
+    { id: "any", symbol: "ANY", name: "Any Asset", iconUrl: "" },
+    ...userTokens.map((t, i) => ({
+      id: `token-${i}`,
+      symbol: t.symbol,
+      name: t.name,
+      iconUrl: t.iconUrl,
+    })),
+  ];
+
+  useEffect(() => {
+    let cancelled = false;
+    const initialize = () => {
+      if (id) {
+        if (!cancelled) {
+          setParticipants([
+            { address: "0x71C5...3B21", share: "40", type: "address" },
+            { address: "0x44A5...9F02", share: "25", type: "address" },
+            { address: "0x99B2...1C44", share: "20", type: "address" },
+            { address: "0x22D3...8E11", share: "15", type: "address" },
+          ]);
+          setSplitName("SPlit Name Here");
+          // setSelectedToken(tokenOptions[1]);
+        }
+      }
+      setParticipants([
+        {
+          address: currentAccount?.address || "",
+          share: "60",
+          type: "address",
+        },
+        { address: "", share: "40", type: "contact" },
+      ]);
+    };
+
+    initialize();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentAccount?.address, id]);
 
   const totalShareSum = participants.reduce(
     (sum, p) => sum + (parseFloat(p.share) || 0),
@@ -60,7 +86,10 @@ export default function AddSplit() {
   );
 
   const handleAddParticipant = () => {
-    setParticipants([...participants, { address: "", share: "" }]);
+    setParticipants([
+      ...participants,
+      { address: "", share: "", type: "contact" },
+    ]);
   };
 
   const handleRemoveParticipant = (index: number) => {
@@ -71,12 +100,16 @@ export default function AddSplit() {
 
   const handleParticipantChange = (
     index: number,
-    field: keyof Participant,
+    field: "address" | "share",
     value: string,
   ) => {
     const updated = participants.map((p, i) => {
       if (i === index) {
-        return { ...p, [field]: value };
+        return {
+          ...p,
+          [field]: value,
+          type: field === "address" ? determineType(value) : p.type,
+        };
       }
       return p;
     });
@@ -88,20 +121,86 @@ export default function AddSplit() {
     setShowTokenDropdown(false);
   };
 
-  const handleSubmit = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    if (totalShareSum !== 100) return;
-
-    if (isEdit) {
-      alert(
-        `Split updated successfully!\nName: ${splitName}\nToken: ${selectedToken.symbol}`,
-      );
-    } else {
-      alert(
-        `Split created successfully!\nName: ${splitName}\nToken: ${selectedToken.symbol}`,
-      );
+  const getDistType = (): "Manual" | "Threshold" | "Scheduled" | "Incoming" => {
+    switch (distributionEngine) {
+      case "Manual Trigger":
+        return "Manual";
+      case "Threshold Trigger":
+        return "Threshold";
+      case "Scheduled Trigger":
+        return "Scheduled";
+      default:
+        return "Incoming";
     }
   };
+
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    if (totalShareSum !== 100 || !currentAccount) return;
+    if (isEdit) {
+      alert("Edit not supported");
+      return;
+    }
+
+    try {
+      const distType = getDistType();
+      const result = await createSplit({
+        name: splitName,
+        recipients: participants.map((p) => ({
+          identifier: p.address,
+          type: p.type,
+          share: parseFloat(p.share),
+        })),
+        distributionType: distType,
+        threshold:
+          distType === "Threshold" ? parseFloat(thresholdValue || "0") : 0,
+      });
+
+      setCreatedSplitId(result.splitId);
+      setInvitePasscodes(result.passcodes);
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    }
+  };
+
+  // Show invite links after creation
+  if (createdSplitId) {
+    const inviteRecipients = participants.filter((_, i) => invitePasscodes[i]);
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.pageTitle}>Split Created!</h1>
+          <p className={styles.pageSubtitle}>
+            Your split is live on testnet. Share these invites.
+          </p>
+        </div>
+        <div className={styles.invitesContainer}>
+          {inviteRecipients.map((r, i) => {
+            const link = `${window.location.origin}/confirm/${createdSplitId}?code=${invitePasscodes[i]}`;
+            return (
+              <Card key={i} variant="light" className={styles.inviteCard}>
+                <p className={styles.inviteLabel}>
+                  {r.address || `Recipient ${i + 1}`}
+                </p>
+                <p className={styles.inviteLink}>{link}</p>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(link);
+                    setCopiedIndex(i);
+                    setTimeout(() => setCopiedIndex(null), 2000);
+                  }}
+                >
+                  <Copy size={16} />
+                  {copiedIndex === i ? "Copied!" : "Copy Link"}
+                </Button>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -116,7 +215,6 @@ export default function AddSplit() {
 
       <form onSubmit={handleSubmit} className={styles.formContainer}>
         <Card variant="light" className={styles.formCard}>
-          {/* Top Row: Name and Token Selector */}
           <div className={styles.topRowGrid}>
             <div className={styles.inputGroup}>
               <label className={styles.label}>Split Name</label>
@@ -129,7 +227,6 @@ export default function AddSplit() {
                 required
               />
             </div>
-
             <div className={styles.inputGroup}>
               <label className={styles.label}>Receive Token</label>
               <div className={styles.tokenSelectorContainer}>
@@ -140,18 +237,20 @@ export default function AddSplit() {
                 >
                   <div className={styles.tokenSelectorLeft}>
                     <div
-                      className={`${styles.tokenIconWrapper} ${
-                        styles[selectedToken.symbol.toLowerCase()]
-                      }`}
+                      className={`${styles.tokenIconWrapper} ${styles[selectedToken.symbol.toLowerCase()]}`}
                     >
                       {selectedToken.symbol === "ANY" ? (
                         <span className={styles.anyIconText}>*</span>
-                      ) : (
+                      ) : selectedToken.iconUrl ? (
                         <img
                           src={selectedToken.iconUrl}
                           alt={selectedToken.symbol}
                           className={styles.tokenIcon}
                         />
+                      ) : (
+                        <span className={styles.anyIconText}>
+                          {selectedToken.symbol[0]}
+                        </span>
                       )}
                     </div>
                     <div className={styles.tokenTextStack}>
@@ -165,7 +264,6 @@ export default function AddSplit() {
                   </div>
                   <ChevronDown size={20} className={styles.chevronIcon} />
                 </button>
-
                 {showTokenDropdown && (
                   <div className={styles.tokenSelectorDropdownList}>
                     {tokenOptions.map((token) => (
@@ -176,18 +274,20 @@ export default function AddSplit() {
                         className={styles.tokenSelectorDropdownItem}
                       >
                         <div
-                          className={`${styles.tokenIconWrapper} ${
-                            styles[token.symbol.toLowerCase()]
-                          }`}
+                          className={`${styles.tokenIconWrapper} ${styles[token.symbol.toLowerCase()]}`}
                         >
                           {token.symbol === "ANY" ? (
                             <span className={styles.anyIconText}>*</span>
-                          ) : (
+                          ) : token.iconUrl ? (
                             <img
                               src={token.iconUrl}
                               alt={token.symbol}
                               className={styles.tokenIcon}
                             />
+                          ) : (
+                            <span className={styles.anyIconText}>
+                              {token.symbol[0]}
+                            </span>
                           )}
                         </div>
                         <div className={styles.tokenTextStack}>
@@ -206,7 +306,6 @@ export default function AddSplit() {
             </div>
           </div>
 
-          {/* Participants Section */}
           <div className={styles.participantsSection}>
             <div className={styles.participantsHeader}>
               <h3>Participants</h3>
@@ -215,11 +314,9 @@ export default function AddSplit() {
                 onClick={handleAddParticipant}
                 className={styles.addParticipantBtn}
               >
-                <PlusCircle size={16} />
-                <span>Add Participant</span>
+                <PlusCircle size={16} /> <span>Add Participant</span>
               </button>
             </div>
-
             <div className={styles.participantsList}>
               {participants.map((p, index) => (
                 <div key={index} className={styles.participantRow}>
@@ -242,7 +339,6 @@ export default function AddSplit() {
                       required
                     />
                   </div>
-
                   <div className={styles.shareInputCol}>
                     <span className={styles.fieldLabel}>Percentage Share</span>
                     <div className={styles.shareInputWrapper}>
@@ -265,7 +361,6 @@ export default function AddSplit() {
                       <span className={styles.percentSymbol}>%</span>
                     </div>
                   </div>
-
                   <div className={styles.deleteCol}>
                     <div className={styles.fieldLabelEmpty} />
                     <button
@@ -273,7 +368,6 @@ export default function AddSplit() {
                       onClick={() => handleRemoveParticipant(index)}
                       className={styles.deleteBtn}
                       disabled={participants.length <= 1}
-                      title="Remove participant"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -281,27 +375,17 @@ export default function AddSplit() {
                 </div>
               ))}
             </div>
-
-            {/* Total Split Progress Bar */}
             <div className={styles.totalSplitWrapper}>
               <div className={styles.totalSplitContainer}>
                 <span className={styles.totalSplitLabel}>Total Split</span>
                 <div className={styles.progressBarTrack}>
                   <div
-                    className={`${styles.progressBarFill} ${
-                      totalShareSum === 100
-                        ? styles.progressSuccess
-                        : styles.progressWarning
-                    }`}
+                    className={`${styles.progressBarFill} ${totalShareSum === 100 ? styles.progressSuccess : styles.progressWarning}`}
                     style={{ width: `${Math.min(totalShareSum, 100)}%` }}
                   />
                 </div>
                 <span
-                  className={`${styles.totalSplitPercentage} ${
-                    totalShareSum === 100
-                      ? styles.textSuccess
-                      : styles.textWarning
-                  }`}
+                  className={`${styles.totalSplitPercentage} ${totalShareSum === 100 ? styles.textSuccess : styles.textWarning}`}
                 >
                   {totalShareSum}%
                 </span>
@@ -309,7 +393,6 @@ export default function AddSplit() {
             </div>
           </div>
 
-          {/* Distribution Engine Section */}
           <div className={styles.engineSection}>
             <label className={styles.label}>Distribution Engine</label>
             <div className={styles.engineSelectWrapper}>
@@ -318,7 +401,7 @@ export default function AddSplit() {
                 onChange={(e) => setDistributionEngine(e.target.value)}
                 className={styles.engineSelect}
               >
-                <option>Automated Trigger (Smart Contract)</option>
+                <option>Automated Trigger</option>
                 <option>Manual Trigger</option>
                 <option>Threshold Trigger</option>
                 <option>Scheduled Trigger</option>
@@ -327,8 +410,6 @@ export default function AddSplit() {
                 <ChevronDown size={18} />
               </div>
             </div>
-
-            {/* Conditional Distribution Engine Fields */}
             {distributionEngine === "Threshold Trigger" && (
               <div className={styles.engineFieldGroup}>
                 <label className={styles.label}>Threshold Amount</label>
@@ -348,7 +429,6 @@ export default function AddSplit() {
                 </div>
               </div>
             )}
-
             {distributionEngine === "Scheduled Trigger" && (
               <div className={styles.engineFieldGroup}>
                 <label className={styles.label}>Distribution Interval</label>
@@ -368,22 +448,22 @@ export default function AddSplit() {
                 </div>
               </div>
             )}
-
             <p className={styles.helperText}>
               Funds will be automatically routed as soon as they hit the split
               wallet address.
             </p>
           </div>
 
-          {/* Add Split / Save Changes Action Button */}
           <Button
             type="submit"
             variant="primary"
             className={styles.submitBtn}
-            disabled={totalShareSum !== 100}
+            disabled={totalShareSum !== 100 || creating || !currentAccount}
           >
             <Check size={18} />
-            <span>{isEdit ? "Save Changes" : "Add Split"}</span>
+            <span>
+              {creating ? "Creating..." : isEdit ? "Save Changes" : "Add Split"}
+            </span>
           </Button>
         </Card>
       </form>

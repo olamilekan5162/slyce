@@ -6,7 +6,6 @@ import styles from "./ConfirmSplit.module.css";
 const PASSCODE_LENGTH = 6;
 
 export default function ConfirmSplit() {
-  const [isConnected, setIsConnected] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [passcode, setPasscode] = useState<string[]>(
     Array(PASSCODE_LENGTH).fill(""),
@@ -60,8 +59,7 @@ export default function ConfirmSplit() {
   };
 
   const progress = data.confirmed / data.total;
-
-  const handleConnect = () => setIsConnected(true);
+  const isConnected = false;
 
   const handlePasscodeChange = (index: number, value: string) => {
     if (value.length > 1) {
@@ -287,11 +285,7 @@ export default function ConfirmSplit() {
         </div>
       </div>
 
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onConnect={handleConnect}
-      />
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </div>
   );
 }

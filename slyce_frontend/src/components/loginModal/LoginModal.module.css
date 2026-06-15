@@ -20,6 +20,10 @@
   font-size: 14px;
   font-weight: 700;
   border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .dividerContainer {
@@ -76,4 +80,18 @@
 
 .legalLink:hover {
   text-decoration: underline;
+}
+
+.walletIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.socialIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: contain;
 }
