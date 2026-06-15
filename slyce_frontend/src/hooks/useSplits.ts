@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
-import { getPackageId } from "../lib/contract";
+import { buildConfirmSplitTx, getPackageId } from "../lib/contract";
 import { buildCreateSplitTx } from "../lib/contract";
 import { hashPasscode } from "../lib/helpers";
 import type { RecipientType, SplitFormData } from "../types";
@@ -52,7 +52,7 @@ export function useSplits() {
         recipients: input.recipients.map((r) => ({
           contact: r.identifier,
           address: r.type === "address" ? r.identifier : "0x0",
-          share: r.share, // convert % to decimal (e.g. 50 -> 0.5)
+          share: r.share,
         })),
         distributionType: input.distributionType,
         threshold: input.threshold,
@@ -60,7 +60,6 @@ export function useSplits() {
       };
 
       const tx = buildCreateSplitTx(splitData, hashedPasscodes, packageId);
-      // tx.setSender(currentAccount.address);
 
       const result = await dAppKit.signAndExecuteTransaction({
         transaction: tx,
@@ -88,88 +87,33 @@ export function useSplits() {
     }
   };
 
-  const confirmSplit = useCallback(
-    async (
-      splitId: string,
-      recipientIndex: number,
-      passcode: number[],
-    ): Promise<string> => {
-      if (!currentAccount) throw new Error("Wallet not connected");
-      const packageId = getPackageId();
-      if (!packageId) throw new Error("Contract not deployed");
+  const confirmSplit = async (
+    splitId: string,
+    recipientIndex: number,
+    passcode: number[],
+  ): Promise<string> => {
+    if (!currentAccount) throw new Error("Wallet not connected");
+    const packageId = getPackageId();
+    if (!packageId) throw new Error("Contract not deployed");
 
-      const { buildConfirmSplitTx } = await import("../lib/contract");
-      const tx = buildConfirmSplitTx(
-        splitId,
-        recipientIndex,
-        passcode,
-        packageId,
-      );
-      tx.setSender(currentAccount.address);
+    const tx = buildConfirmSplitTx(
+      splitId,
+      recipientIndex,
+      passcode,
+      packageId,
+    );
 
-      const result = await dAppKit.signAndExecuteTransaction({
-        transaction: tx,
-      });
-      if (result.$kind === "FailedTransaction")
-        throw new Error("Transaction failed");
-      return result.Transaction.digest;
-    },
-    [currentAccount, dAppKit],
-  );
-
-  const cancelSplit = useCallback(
-    async (splitId: string): Promise<string> => {
-      if (!currentAccount) throw new Error("Wallet not connected");
-      const packageId = getPackageId();
-      if (!packageId) throw new Error("Contract not deployed");
-
-      const { Transaction } = await import("@mysten/sui/transactions");
-      const tx = new Transaction();
-      tx.moveCall({
-        target: `${packageId}::slyce::cancel_split`,
-        arguments: [tx.object(splitId)],
-      });
-      tx.setSender(currentAccount.address);
-
-      const result = await dAppKit.signAndExecuteTransaction({
-        transaction: tx,
-      });
-      if (result.$kind === "FailedTransaction")
-        throw new Error("Transaction failed");
-      return result.Transaction.digest;
-    },
-    [currentAccount, dAppKit],
-  );
-
-  const depositToVault = useCallback(
-    async (
-      splitId: string,
-      coinType: string,
-      coinId: string,
-    ): Promise<string> => {
-      if (!currentAccount) throw new Error("Wallet not connected");
-      const packageId = getPackageId();
-      if (!packageId) throw new Error("Contract not deployed");
-
-      const { buildDepositToVaultTx } = await import("../lib/contract");
-      const tx = buildDepositToVaultTx(splitId, coinType, coinId, packageId);
-      tx.setSender(currentAccount.address);
-
-      const result = await dAppKit.signAndExecuteTransaction({
-        transaction: tx,
-      });
-      if (result.$kind === "FailedTransaction")
-        throw new Error("Transaction failed");
-      return result.Transaction.digest;
-    },
-    [currentAccount, dAppKit],
-  );
+    const result = await dAppKit.signAndExecuteTransaction({
+      transaction: tx,
+    });
+    if (result.$kind === "FailedTransaction")
+      throw new Error("Transaction failed");
+    return result.Transaction.digest;
+  };
 
   return {
     createSplit,
     confirmSplit,
-    cancelSplit,
-    depositToVault,
     creating,
     isConnected: !!currentAccount,
     address: currentAccount?.address ?? null,

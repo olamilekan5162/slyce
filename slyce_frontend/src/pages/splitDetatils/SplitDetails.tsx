@@ -4,68 +4,24 @@ import { Copy } from "lucide-react";
 import Button from "../../components/button/Button";
 import Card from "../../components/card/Card";
 import TokensCard from "../../components/tokensCard/TokensCard";
-import { tokens } from "../../lib/mockData";
 import styles from "./SpltDetails.module.css";
 import AddParticipantModal from "../../components/addParticipantModal/AddParticipantModal";
+import { useFetchSplitById } from "../../hooks/useFetchSplitById";
+import { formatAddress } from "@mysten/sui/utils";
 
 export default function SplitDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
+  const { split } = useFetchSplitById(id || "");
 
-  const data = {
-    id: id || "1",
-    title: "Project Alpha Royalties",
-    confirmedCollaborators: 3,
-    totalCollaborators: 4,
-    distributionType: "Automated Trigger",
-    splitAddress: "0x7F23...8a9B",
-    creatorAddress: "0x234d...2345",
-    smartContractId: "sc_lyce_9283f12a",
-    collaborators: [
-      {
-        id: "c1",
-        name: "Alex Morgan",
-        address: "0x71C5...3B21",
-        avatar: "AM",
-        percentage: 40,
-        status: "Confirmed",
-        avatarColor: styles.bgAvatarDark,
-      },
-      {
-        id: "c2",
-        name: "Sarah Jenkins",
-        address: "0x44A5...9F02",
-        avatar: "SJ",
-        percentage: 25,
-        status: "Confirmed",
-        avatarColor: styles.bgAvatarPurple,
-      },
-      {
-        id: "c3",
-        name: "David Kim",
-        address: "0x99B2...1C44",
-        avatar: "DK",
-        percentage: 20,
-        status: "Confirmed",
-        avatarColor: styles.bgAvatarBlue,
-      },
-      {
-        id: "c4",
-        name: "Mia Lin",
-        address: "0x22D3...8E11",
-        avatar: "ML",
-        percentage: 15,
-        status: "Pending",
-        avatarColor: styles.bgAvatarGrey,
-      },
-    ],
-  };
+  console.log("Split:", split);
 
-  const progress = data.confirmedCollaborators / data.totalCollaborators;
+  const progress =
+    (split?.confirmedCount || 0) / (split?.recipients.length || 0);
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(data.splitAddress);
+    navigator.clipboard.writeText(split?.id || "");
     alert("Split address copied to clipboard!");
   };
 
@@ -74,14 +30,14 @@ export default function SplitDetails() {
       <div className={styles.headerRow}>
         <div className={styles.titleArea}>
           <h1 className={styles.pageTitle}>Split Details</h1>
-          <p className={styles.pageSubtitle}>{data.title}</p>
+          <p className={styles.pageSubtitle}>{split?.name}</p>
         </div>
 
         <div className={styles.headerActions}>
           <Button
             variant="ghost"
             className={styles.editBtn}
-            onClick={() => navigate(`/app/splits/${data.id}/edit`)}
+            onClick={() => navigate(`/app/splits/${split?.id}/edit`)}
           >
             <span>Edit Split</span>
           </Button>
@@ -97,7 +53,7 @@ export default function SplitDetails() {
 
       <div className={styles.detailsGrid}>
         <div className={styles.leftColumn}>
-          <TokensCard tokens={tokens} className={styles.tokensCard} />
+          <TokensCard address={id!} className={styles.tokensCard} />
         </div>
 
         <div className={styles.rightColumn}>
@@ -107,38 +63,38 @@ export default function SplitDetails() {
             </div>
 
             <div className={styles.collaboratorsList}>
-              {data.collaborators.map((c) => (
-                <div key={c.id} className={styles.collaboratorRow}>
+              {split?.recipients.map((c) => (
+                <div key={c.address} className={styles.collaboratorRow}>
                   <div className={styles.collabLeft}>
-                    <div className={`${styles.avatarCircle} ${c.avatarColor}`}>
-                      {c.avatar}
+                    <div className={`${styles.avatarCircle}`}>
+                      {c.contact?.slice(0, 2)}
                     </div>
                     <div className={styles.collabInfo}>
-                      <span className={styles.collabName}>{c.name}</span>
-                      <span className={styles.collabAddress}>{c.address}</span>
+                      <span className={styles.collabName}>
+                        {formatAddress(c.contact)}
+                      </span>
+                      <span className={styles.collabAddress}>
+                        {formatAddress(c.address || "")}
+                      </span>
                     </div>
                   </div>
 
                   <div className={styles.collabRight}>
-                    <span className={styles.collabShare}>
-                      {c.percentage}% Share
-                    </span>
+                    <span className={styles.collabShare}>{c.share}% Share</span>
                     <div className={styles.collabStatus}>
                       <span
                         className={`${styles.statusDot} ${
-                          c.status === "Confirmed"
-                            ? styles.dotConfirmed
-                            : styles.dotPending
+                          c.confirmed ? styles.dotConfirmed : styles.dotPending
                         }`}
                       />
                       <span
                         className={`${styles.statusText} ${
-                          c.status === "Confirmed"
+                          c.confirmed
                             ? styles.textConfirmed
                             : styles.textPending
                         }`}
                       >
-                        {c.status}
+                        {c.confirmed ? "Confrmed" : "Pending"}
                       </span>
                     </div>
                   </div>
@@ -151,8 +107,7 @@ export default function SplitDetails() {
             <div className={styles.configHeader}>
               <h3>Configuration Setup</h3>
               <span className={styles.confirmedBadge}>
-                {data.confirmedCollaborators} / {data.totalCollaborators}{" "}
-                Confirmed
+                {split?.confirmedCount} / {split?.recipients.length} Confirmed
               </span>
             </div>
 
@@ -179,27 +134,29 @@ export default function SplitDetails() {
                   onClick={handleCopyAddress}
                   className={styles.copyAddressBtn}
                 >
-                  <span>{data.splitAddress}</span>
+                  <span>{formatAddress(split?.id || "")}</span>
                   <Copy size={14} />
                 </button>
               </div>
 
               <div className={styles.specRow}>
                 <span className={styles.specLabel}>Creator</span>
-                <span className={styles.specValue}>{data.creatorAddress}</span>
+                <span className={styles.specValue}>
+                  {formatAddress(split?.creator || "")}
+                </span>
               </div>
 
               <div className={styles.specRow}>
                 <span className={styles.specLabel}>Distribution Engine</span>
                 <span className={styles.engineBadge}>
-                  {data.distributionType}
+                  {split?.distributionType}
                 </span>
               </div>
 
-              <div className={styles.specRow}>
+              {/* <div className={styles.specRow}>
                 <span className={styles.specLabel}>Smart Contract ID</span>
                 <span className={styles.specValue}>{data.smartContractId}</span>
-              </div>
+              </div> */}
             </div>
           </Card>
         </div>

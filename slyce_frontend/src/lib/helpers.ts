@@ -1,3 +1,7 @@
+import type { ClientWithCoreApi } from "@mysten/dapp-kit-react";
+import type { SuiGrpcClient } from "@mysten/sui/grpc";
+import type { Asset } from "../types";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const TOKEN_ICONS: Record<string, string> = {
   SUI: "https://s2.coinmarketcap.com/static/img/coins/64x64/20947.png",
@@ -46,16 +50,7 @@ export const getTokenPrice = async (
 
 export const getCoinsMetadata = async (
   coinType: string,
-  client: {
-    getCoinMetadata: (opts: { coinType: string }) => Promise<{
-      coinMetadata?: {
-        symbol: string;
-        name: string;
-        decimals: number;
-        iconUrl: string;
-      } | null;
-    }>;
-  },
+  client: SuiGrpcClient,
 ): Promise<{
   symbol: string;
   name: string;
@@ -107,4 +102,56 @@ export const formatAddress = (address: string): string => {
 
 export const formatShare = (bps: number): string => {
   return `${(bps / 100).toFixed(1)}%`;
+};
+
+export const fetchBalanceInDollars = async (
+  client: ClientWithCoreApi,
+  address: string,
+) => {
+  try {
+    const { balances } = await client.core.listBalances({
+      owner: address,
+    });
+
+    const userAssets: Asset[] = [];
+
+    for (const balance of balances) {
+      const meta = await client.core.getCoinMetadata({
+        coinType: balance.coinType,
+      });
+      const metadata = meta.coinMetadata;
+      const decimals = metadata?.decimals ?? 0;
+      const formattedBalance = Number(balance.balance) / Math.pow(10, decimals);
+
+      const { price: priceUsd, change24h } = await getTokenPrice(
+        balance.coinType,
+      );
+      const usdValue = formattedBalance * priceUsd;
+
+      userAssets.push({
+        symbol: metadata?.symbol ?? "",
+        name: metadata?.name ?? "",
+        decimals,
+        iconUrl: metadata?.iconUrl ?? "",
+        balance: formattedBalance,
+        usdValue:
+          usdValue > 0
+            ? `$${usdValue.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`
+            : "$0.00",
+        priceChangePercent: change24h,
+      });
+    }
+
+    const totalUsd = userAssets.reduce((sum, a) => {
+      const numeric = parseFloat(a.usdValue?.replace(/[$,]/g, "") || "0") || 0;
+      return sum + numeric;
+    }, 0);
+
+    return { totalUsd };
+  } catch (err) {
+    console.error("Error fetching balances:", err);
+  }
 };

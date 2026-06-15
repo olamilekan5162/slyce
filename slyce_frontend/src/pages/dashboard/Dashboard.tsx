@@ -3,12 +3,16 @@ import Card from "../../components/card/Card";
 import Button from "../../components/button/Button";
 import styles from "./Dashboard.module.css";
 import TransactionTable from "../../components/traansactionTable/TransactionTable";
-import { tokens, transactions } from "../../lib/mockData";
+import { transactions } from "../../lib/mockData";
 import TokensCard from "../../components/tokensCard/TokensCard";
 import { useNavigate } from "react-router-dom";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { useBalances } from "../../hooks/useBalances";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const currentAccount = useCurrentAccount();
+  const { totalBalance } = useBalances(currentAccount?.address);
 
   return (
     <div className={styles.dashboard}>
@@ -29,7 +33,7 @@ const Dashboard = () => {
       <div className={styles.overviewGrid}>
         <Card variant="dark" className={styles.statsCard}>
           <div className={styles.cardLabel}>Current Balance</div>
-          <div className={styles.balanceAmount}>$4,836.00</div>
+          <div className={styles.balanceAmount}>${totalBalance}</div>
         </Card>
 
         <Card variant="light" className={styles.statsCard}>
@@ -93,7 +97,7 @@ const Dashboard = () => {
         </div>
 
         {/* Right Column */}
-        <TokensCard tokens={tokens} />
+        <TokensCard address={currentAccount?.address || ""} />
       </div>
     </div>
   );

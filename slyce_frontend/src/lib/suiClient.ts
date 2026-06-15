@@ -1,27 +1,25 @@
 import { createDAppKit } from "@mysten/dapp-kit-core";
-import { SuiJsonRpcClient, getJsonRpcFullnodeUrl } from "@mysten/sui/jsonRpc";
 import { enokiWalletsInitializer } from "@mysten/enoki";
+import { SuiGraphQLClient } from "@mysten/sui/graphql";
+import { SuiGrpcClient } from "@mysten/sui/grpc";
 
 const NETWORKS = ["testnet", "mainnet"];
+const GRPC_URLS = {
+  testnet: "https://fullnode.testnet.sui.io:443",
+  mainnet: "https://fullnode.mainnet.sui.io:443",
+  devnet: "https://fullnode.devnet.sui.io:443",
+};
 
-/**
- * Creates a SuiJsonRpcClient for the given network.
- * If no network is provided, defaults to testnet.
- */
 const createClient = (network?: string) => {
   const networkName = (network || "testnet").split(":")[0] as
     | "testnet"
     | "mainnet";
-  return new SuiJsonRpcClient({
-    url: getJsonRpcFullnodeUrl(networkName),
+  return new SuiGrpcClient({
+    baseUrl: GRPC_URLS[networkName],
     network: networkName,
   });
 };
 
-/**
- * The Slyce DAppKit instance.
- * Provides wallet connection, transaction signing, and network management.
- */
 export const dAppKit = createDAppKit({
   networks: NETWORKS,
   createClient,
@@ -47,7 +45,7 @@ export const dAppKit = createDAppKit({
   ],
 });
 
-/**
- * Convenience type for the Slyce DAppKit.
- */
-export type SlyceDAppKit = typeof dAppKit;
+export const graphqlClient = new SuiGraphQLClient({
+  url: "https://graphql.testnet.sui.io/graphql",
+  network: "testnet",
+});

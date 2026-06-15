@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useCurrentClient } from "@mysten/dapp-kit-react";
 import type { Asset } from "../types";
 import { TOKEN_ICONS } from "../lib/helpers";
+import { useCurrentClient } from "@mysten/dapp-kit-react";
 
 export function useTokens(address: string) {
-  const client = useCurrentClient();
+  const client = useCurrentClient()
   const [tokens, setTokens] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(false);
 

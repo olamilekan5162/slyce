@@ -34,6 +34,7 @@ export interface Split {
   threshold: number;
   interval: number;
   targetCurrency?: string;
+  totalUsd?: number;
 }
 
 export interface SplitFormData {

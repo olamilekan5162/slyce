@@ -241,6 +241,12 @@ module slyce::slyce;
         first_recipient.confirmed = true;
         first_recipient.confirmed_address = option::some(ctx.sender());
 
+        event::emit(RecipientConfirmedEvent {
+            split_id:           uid.to_inner(),
+            recipient:          ctx.sender(),
+            confirmations_left: n - 1,
+        });
+
         let split = Split {
             id:                   uid,
             name,

@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { useCurrentAccount, useCurrentClient } from "@mysten/dapp-kit-react";
-import { getTokenPrice } from "../lib/helpers";
+import { useCurrentClient } from "@mysten/dapp-kit-react";
+import { getTokenPrice, TOKEN_ICONS } from "../lib/helpers";
 import type { Asset } from "../types";
 
-export function useBalances() {
-  const currentAccount = useCurrentAccount();
+export function useBalances(address?: string) {
   const client = useCurrentClient();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [totalBalance, setTotalBalance] = useState(0);
@@ -15,14 +14,14 @@ export function useBalances() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!currentAccount) return;
+    if (!address) return;
     let cancelled = false;
 
     const fetchBalances = async () => {
       setLoading(true);
       try {
         const { balances } = await client.core.listBalances({
-          owner: currentAccount.address,
+          owner: address,
         });
 
         const userAssets: Asset[] = [];
@@ -45,7 +44,8 @@ export function useBalances() {
             symbol: metadata?.symbol ?? "",
             name: metadata?.name ?? "",
             decimals,
-            iconUrl: metadata?.iconUrl ?? "",
+            iconUrl:
+              metadata?.iconUrl || TOKEN_ICONS[metadata?.symbol ?? ""] || "",
             balance: formattedBalance,
             usdValue:
               usdValue > 0
@@ -97,13 +97,13 @@ export function useBalances() {
     return () => {
       cancelled = true;
     };
-  }, [currentAccount, client]);
+  }, [address, client]);
 
   return {
     assets,
     totalBalance,
     portfolioChange,
     loading,
-    isConnected: !!currentAccount,
+    isConnected: !!address,
   };
 }

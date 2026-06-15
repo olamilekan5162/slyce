@@ -7,10 +7,17 @@ import styles from "./Profile.module.css";
 import Button from "../../components/button/Button";
 import AddFundsModal from "../../components/addFundsModal/AddFundsModal";
 import WithdrawModal from "../../components/withdrawModal/WithdrawModal";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { useBalances } from "../../hooks/useBalances";
+import { formatAddress } from "@mysten/sui/utils";
+import { useFetchSplits } from "../../hooks/useFetchSplits";
 
 const Profile = () => {
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const currentAccount = useCurrentAccount();
+  const { totalBalance } = useBalances(currentAccount?.address);
+  const { splits } = useFetchSplits(true);
 
   return (
     <div className={styles.dashboard}>
@@ -20,9 +27,9 @@ const Profile = () => {
           <Card variant="light" className={styles.balanceCard}>
             <div className={styles.balanceInfo}>
               <span className={styles.cardLabel}>Account Balance</span>
-              <span className={styles.balanceAmount}>$384.98</span>
+              <span className={styles.balanceAmount}>${totalBalance}</span>
             </div>
-            
+
             <div className={styles.balanceActions}>
               <Button
                 variant="primary"
@@ -50,9 +57,9 @@ const Profile = () => {
                 Disconnect
               </button>
             </div>
-            
+
             <div className={styles.walletAddress}>
-              0x123465...098448
+              {formatAddress(currentAccount?.address || "")}
             </div>
 
             <div className={styles.walletFooter}>
@@ -62,15 +69,27 @@ const Profile = () => {
               </div>
 
               <div className={styles.avatarList}>
-                <div className={`${styles.avatarCircle} ${styles.avatarOrange}`}>JD</div>
-                <div className={`${styles.avatarCircle} ${styles.avatarBlue}`}>MK</div>
-                <div className={`${styles.avatarCircle} ${styles.avatarPurple}`}>SL</div>
-                <div className={`${styles.avatarCircle} ${styles.avatarGrey}`}>+17</div>
+                <div
+                  className={`${styles.avatarCircle} ${styles.avatarOrange}`}
+                >
+                  JD
+                </div>
+                <div className={`${styles.avatarCircle} ${styles.avatarBlue}`}>
+                  MK
+                </div>
+                <div
+                  className={`${styles.avatarCircle} ${styles.avatarPurple}`}
+                >
+                  SL
+                </div>
+                <div className={`${styles.avatarCircle} ${styles.avatarGrey}`}>
+                  +17
+                </div>
               </div>
             </div>
           </Card>
         </div>
-        
+
         <SplitTable splits={transactions} />
       </div>
 

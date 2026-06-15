@@ -6,16 +6,16 @@ import { savingsPots } from "../../lib/mockData";
 import Card from "../../components/card/Card";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/pagination/Pagination";
+import { useFetchSplits } from "../../hooks/useFetchSplits";
 
 const Splits = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   const totalPages = Math.ceil(savingsPots.length / itemsPerPage) || 1;
-  const displayedPots = savingsPots.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const { splits } = useFetchSplits(false);
+
+  console.log("Splits:", splits);
 
   return (
     <div className={styles.dashboard}>
@@ -32,14 +32,14 @@ const Splits = () => {
       </div>
 
       <div className={styles.cardsGrid}>
-        {displayedPots.map((pot) => {
-          const progress = pot.confirmedCollaborators / pot.totalCollaborators;
+        {splits.map((split) => {
+          const progress = split.confirmedCount / split.recipients.length;
 
           return (
             <Card
-              key={pot.id}
+              key={split.id}
               className={styles.card}
-              onClick={() => navigate(`/app/splits/${pot.id}`)}
+              onClick={() => navigate(`/app/splits/${split.id}`)}
             >
               <div className={styles.header}>
                 <div className={styles.titleRow}>
@@ -49,7 +49,7 @@ const Splits = () => {
                     stroke="none"
                     className={styles.dot}
                   />
-                  <span className={styles.title}>{pot.title}</span>
+                  <span className={styles.title}>{split.name}</span>
                 </div>
                 <button className={styles.menuBtn} aria-label="Options">
                   <MoreHorizontal size={18} color="#9CA3AF" />
@@ -59,7 +59,7 @@ const Splits = () => {
               <div className={styles.body}>
                 <span className={styles.label}>Total Received</span>
                 <span className={styles.amount}>
-                  ${pot.totalReceived.toFixed(2)}
+                  ${split.totalUsd?.toFixed(2)}
                 </span>
               </div>
 
@@ -72,12 +72,12 @@ const Splits = () => {
 
               <div className={styles.footer}>
                 <span className={styles.confirmed}>
-                  {pot.confirmedCollaborators} Collaborator
-                  {pot.confirmedCollaborators !== 1 ? "s" : ""} confirmed
+                  {split.confirmedCount} Collaborator
+                  {split.confirmedCount !== 1 ? "s" : ""} confirmed
                 </span>
                 <span className={styles.total}>
-                  of {pot.totalCollaborators} Collaborator
-                  {pot.totalCollaborators !== 1 ? "s" : ""}
+                  of {split.recipients.length} Collaborator
+                  {split.recipients.length !== 1 ? "s" : ""}
                 </span>
               </div>
             </Card>

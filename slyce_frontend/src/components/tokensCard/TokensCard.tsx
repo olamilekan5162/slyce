@@ -1,28 +1,27 @@
+import { useBalances } from "../../hooks/useBalances";
 import Card from "../card/Card";
 import styles from "./TokensCard.module.css";
 
-interface Token {
-  id: number;
-  symbol: string;
-  name: string;
-  fiatValue: number;
-  amount: number;
-  iconUrl: string;
-}
-
 interface TokensCardProps {
-  tokens: Token[];
+  address: string;
   className?: string;
 }
 
-export default function TokensCard({ tokens, className = "" }: TokensCardProps) {
+export default function TokensCard({
+  address,
+  className = "",
+}: TokensCardProps) {
+  const { assets, portfolioChange, totalBalance } = useBalances(address);
+
   return (
     <Card className={`${styles.rightColumn} ${className}`}>
       <div className={styles.pieChartContainer}>
         <div className={styles.donutWrapper}>
           <div className={styles.donutInner}>
-            <span className={styles.donutAmount}>$338</span>
-            <span className={styles.donutChange}>+97%</span>
+            <span className={styles.donutAmount}>${totalBalance}</span>
+            <span className={styles.donutChange}>
+              +{portfolioChange?.amount.toFixed(2)}
+            </span>
           </div>
         </div>
       </div>
@@ -32,27 +31,27 @@ export default function TokensCard({ tokens, className = "" }: TokensCardProps) 
       </div>
 
       <div className={styles.tokensList}>
-        {tokens.map((token) => (
-          <div key={token.id} className={styles.tokenItem}>
+        {assets.map((asset) => (
+          <div key={asset.name} className={styles.tokenItem}>
             <div className={styles.tokenLeft}>
-              <div className={`${styles.tokenIconWrapper} ${styles[token.symbol.toLowerCase()] || ""}`}>
+              <div
+                className={`${styles.tokenIconWrapper} ${styles[asset.symbol.toLowerCase()] || ""}`}
+              >
                 <img
-                  src={token.iconUrl}
-                  alt={token.symbol}
+                  src={asset.iconUrl}
+                  alt={asset.symbol}
                   className={styles.tokenIcon}
                 />
               </div>
               <div className={styles.tokenInfo}>
-                <div className={styles.tokenSymbol}>{token.symbol}</div>
-                <div className={styles.tokenName}>{token.name}</div>
+                <div className={styles.tokenSymbol}>{asset.symbol}</div>
+                <div className={styles.tokenName}>{asset.name}</div>
               </div>
             </div>
             <div className={styles.tokenRight}>
-              <div className={styles.tokenFiat}>
-                ${token.fiatValue.toFixed(2)}
-              </div>
+              <div className={styles.tokenFiat}>{asset.usdValue}</div>
               <div className={styles.tokenAmount}>
-                {`${token.amount} ${token.symbol}`}
+                {`${asset.balance} ${asset.symbol}`}
               </div>
             </div>
           </div>

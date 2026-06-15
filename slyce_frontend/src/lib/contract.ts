@@ -2,9 +2,9 @@ import { Transaction } from "@mysten/sui/transactions";
 import type { SplitFormData } from "../types";
 
 const DEFAULT_PACKAGE_ID =
-  "0xdeafaf18285bc7ab6182c3995c4a4029dbcede21598f693778ee8f97853cc0b9";
+  "0xc389c65936a6b8da4b673098b86ab23bd001c3ee67401d207ba847fe29bfa15c";
 const PROTOCOL_CONFIG_ID =
-  "0x46340c61325241d3b4f49813c25d4b0515fa6c3c29c645f73f755936b799e6c0";
+  "0x27a5c2f24ef07fc81903f5b31cf460ffb3a650226e4cac61bfbd9694c224e1f3";
 
 export function getPackageId(): string {
   return import.meta.env.VITE_PACKAGE_ID || DEFAULT_PACKAGE_ID;
