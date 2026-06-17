@@ -1,0 +1,43 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  border: 1px solid #374151; /* Fallback for var(--border-color) */
+  border-radius: 16px;
+  width: 100%;
+  min-height: 300px;
+}
+
+.iconWrapper {
+  color: var(--text-primary); /* Fallback for var(--text-secondary) */
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-secondary); /* Fallback for var(--bg-secondary) */
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-bottom: 8px;
+}
+
+.description {
+  font-size: 14px;
+  color: #9ca3af;
+  max-width: 400px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.actionWrapper {
+  margin-top: 8px;
+}

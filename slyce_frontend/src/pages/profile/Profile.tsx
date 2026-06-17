@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Plus, ArrowDownToLine } from "lucide-react";
 import Card from "../../components/card/Card";
 import SplitTable from "../../components/splitTable/SplitTable";
-import { transactions } from "../../lib/mockData";
 import styles from "./Profile.module.css";
 import Button from "../../components/button/Button";
 import AddFundsModal from "../../components/addFundsModal/AddFundsModal";
@@ -11,13 +10,23 @@ import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { useBalances } from "../../hooks/useBalances";
 import { formatAddress } from "@mysten/sui/utils";
 import { useFetchSplits } from "../../hooks/useFetchSplits";
+import { useNavigate } from "react-router-dom";
+import { dAppKit } from "../../lib/suiClient";
+import toast from "react-hot-toast";
 
 const Profile = () => {
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const currentAccount = useCurrentAccount();
   const { totalBalance } = useBalances(currentAccount?.address);
-  const { splits } = useFetchSplits(true);
+  const { splits, loading: splitsLoading } = useFetchSplits(true);
+  const navigate = useNavigate();
+
+  const handleDisconnect = async () => {
+    await dAppKit.disconnectWallet();
+    toast.success("Wallet disconnected successfully");
+    navigate("/");
+  };
 
   return (
     <div className={styles.dashboard}>
@@ -53,7 +62,10 @@ const Profile = () => {
           <Card variant="light" className={styles.walletCard}>
             <div className={styles.walletHeader}>
               <span className={styles.cardLabel}>Wallet Address</span>
-              <button className={styles.disconnectLink} onClick={() => {}}>
+              <button
+                className={styles.disconnectLink}
+                onClick={handleDisconnect}
+              >
                 Disconnect
               </button>
             </div>
@@ -65,32 +77,36 @@ const Profile = () => {
             <div className={styles.walletFooter}>
               <div className={styles.totalSplitsStack}>
                 <span className={styles.cardLabel}>Total Splits</span>
-                <span className={styles.splitsCount}>20</span>
+                <span className={styles.splitsCount}>
+                  {splitsLoading ? "..." : splits?.length}
+                </span>
               </div>
 
               <div className={styles.avatarList}>
-                <div
-                  className={`${styles.avatarCircle} ${styles.avatarOrange}`}
-                >
-                  JD
-                </div>
-                <div className={`${styles.avatarCircle} ${styles.avatarBlue}`}>
-                  MK
-                </div>
-                <div
-                  className={`${styles.avatarCircle} ${styles.avatarPurple}`}
-                >
-                  SL
-                </div>
-                <div className={`${styles.avatarCircle} ${styles.avatarGrey}`}>
-                  +17
-                </div>
+                {splitsLoading
+                  ? "..."
+                  : splits?.slice(0, 3).map((split, index) => (
+                      <div
+                        key={index}
+                        className={`${styles.avatarCircle} ${styles.avatarOrange}`}
+                      >
+                        {split.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    ))}
+
+                {splits.length > 3 && (
+                  <div
+                    className={`${styles.avatarCircle} ${styles.avatarGrey}`}
+                  >
+                    {splitsLoading ? "..." : `+${splits.length - 3}`}
+                  </div>
+                )}
               </div>
             </div>
           </Card>
         </div>
 
-        <SplitTable splits={transactions} />
+        <SplitTable splits={splits} loading={splitsLoading} />
       </div>
 
       <AddFundsModal

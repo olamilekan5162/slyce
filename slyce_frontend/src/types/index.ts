@@ -47,6 +47,7 @@ export interface SplitFormData {
   distributionType: DistributionType;
   threshold: number;
   interval: number;
+  targetCurrency: string;
 }
 
 // ── Asset / Balance Types ──────────────────────────────────────

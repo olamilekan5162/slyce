@@ -9,6 +9,7 @@ import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { useSplits } from "../../hooks/useSplits";
 import { useTokens } from "../../hooks/useTokens";
 import type { RecipientForm, RecipientType, TokenOption } from "../../types";
+import toast from "react-hot-toast";
 
 const determineType = (value: string): RecipientType => {
   if (value.startsWith("0x") && value.length > 30) return "address";
@@ -138,9 +139,10 @@ export default function AddSplit() {
     e.preventDefault();
     if (totalShareSum !== 100 || !currentAccount) return;
     if (isEdit) {
-      alert("Edit not supported");
+      toast.error("Edit not supported");
       return;
     }
+    const toastId = toast.loading("Creating split...");
 
     try {
       const distType = getDistType();
@@ -154,12 +156,18 @@ export default function AddSplit() {
         distributionType: distType,
         threshold:
           distType === "Threshold" ? parseFloat(thresholdValue || "0") : 0,
+        currency: selectedToken.symbol,
       });
-
       setCreatedSplitId(result.splitId);
       setInvitePasscodes(result.passcodes);
+      toast.success("Split created successfully", {
+        id: toastId,
+      });
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      console.log(err);
+      toast.error(err.message, {
+        id: toastId,
+      });
     }
   };
 

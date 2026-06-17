@@ -1,5 +1,6 @@
 import { useBalances } from "../../hooks/useBalances";
 import Card from "../card/Card";
+import LoadingState from "../loadingState/LoadingState";
 import styles from "./TokensCard.module.css";
 
 interface TokensCardProps {
@@ -11,23 +12,30 @@ export default function TokensCard({
   address,
   className = "",
 }: TokensCardProps) {
-  const { assets, portfolioChange, totalBalance } = useBalances(address);
+  const { assets, portfolioChange, totalBalance, loading } =
+    useBalances(address);
 
   return (
     <Card className={`${styles.rightColumn} ${className}`}>
       <div className={styles.pieChartContainer}>
         <div className={styles.donutWrapper}>
           <div className={styles.donutInner}>
-            <span className={styles.donutAmount}>${totalBalance}</span>
-            <span className={styles.donutChange}>
-              +{portfolioChange?.amount.toFixed(2)}
-            </span>
+            {loading ? (
+              <LoadingState message=" " />
+            ) : (
+              <>
+                <span className={styles.donutAmount}>${totalBalance}</span>
+                <span className={styles.donutChange}>
+                  +{portfolioChange?.amount.toFixed(2)}
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       <div className={styles.sectionHeader}>
-        <h3>Tokens</h3>
+        {loading ? "" : assets.length > 0 && <h3>Tokens</h3>}
       </div>
 
       <div className={styles.tokensList}>

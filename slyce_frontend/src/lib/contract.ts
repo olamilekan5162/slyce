@@ -60,7 +60,7 @@ export function buildCreateSplitTx(
       tx.pure.u8(distributionType),
       tx.pure.u64(data.threshold),
       tx.pure.u64(data.interval),
-      tx.pure.option("string", null),
+      tx.pure.option("string", data.targetCurrency),
     ],
   });
 

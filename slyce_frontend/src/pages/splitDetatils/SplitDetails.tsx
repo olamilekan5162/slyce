@@ -8,21 +8,21 @@ import styles from "./SpltDetails.module.css";
 import AddParticipantModal from "../../components/addParticipantModal/AddParticipantModal";
 import { useFetchSplitById } from "../../hooks/useFetchSplitById";
 import { formatAddress } from "@mysten/sui/utils";
+import toast from "react-hot-toast";
+import LoadingState from "../../components/loadingState/LoadingState";
 
 export default function SplitDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
-  const { split } = useFetchSplitById(id || "");
-
-  console.log("Split:", split);
+  const { split, loading } = useFetchSplitById(id || "");
 
   const progress =
     (split?.confirmedCount || 0) / (split?.recipients.length || 0);
 
   const handleCopyAddress = () => {
     navigator.clipboard.writeText(split?.id || "");
-    alert("Split address copied to clipboard!");
+    toast.success("Split address copied to clipboard!");
   };
 
   return (
@@ -51,116 +51,124 @@ export default function SplitDetails() {
         </div>
       </div>
 
-      <div className={styles.detailsGrid}>
-        <div className={styles.leftColumn}>
-          <TokensCard address={id!} className={styles.tokensCard} />
-        </div>
+      {loading ? (
+        <LoadingState message="Loading split detail.." />
+      ) : (
+        <div className={styles.detailsGrid}>
+          <div className={styles.leftColumn}>
+            <TokensCard address={id!} className={styles.tokensCard} />
+          </div>
 
-        <div className={styles.rightColumn}>
-          <Card variant="light" className={styles.participantsCard}>
-            <div className={styles.cardHeader}>
-              <h3>Participants</h3>
-            </div>
+          <div className={styles.rightColumn}>
+            <Card variant="light" className={styles.participantsCard}>
+              <div className={styles.cardHeader}>
+                <h3>Participants</h3>
+              </div>
 
-            <div className={styles.collaboratorsList}>
-              {split?.recipients.map((c) => (
-                <div key={c.address} className={styles.collaboratorRow}>
-                  <div className={styles.collabLeft}>
-                    <div className={`${styles.avatarCircle}`}>
-                      {c.contact?.slice(0, 2)}
+              <div className={styles.collaboratorsList}>
+                {split?.recipients.map((c) => (
+                  <div key={c.address} className={styles.collaboratorRow}>
+                    <div className={styles.collabLeft}>
+                      <div className={`${styles.avatarCircle}`}>
+                        {c.contact?.slice(0, 2)}
+                      </div>
+                      <div className={styles.collabInfo}>
+                        <span className={styles.collabName}>
+                          {formatAddress(c.contact)}
+                        </span>
+                        <span className={styles.collabAddress}>
+                          {formatAddress(c.address || "")}
+                        </span>
+                      </div>
                     </div>
-                    <div className={styles.collabInfo}>
-                      <span className={styles.collabName}>
-                        {formatAddress(c.contact)}
+
+                    <div className={styles.collabRight}>
+                      <span className={styles.collabShare}>
+                        {c.share / 100}% Share
                       </span>
-                      <span className={styles.collabAddress}>
-                        {formatAddress(c.address || "")}
-                      </span>
+                      <div className={styles.collabStatus}>
+                        <span
+                          className={`${styles.statusDot} ${
+                            c.confirmed
+                              ? styles.dotConfirmed
+                              : styles.dotPending
+                          }`}
+                        />
+                        <span
+                          className={`${styles.statusText} ${
+                            c.confirmed
+                              ? styles.textConfirmed
+                              : styles.textPending
+                          }`}
+                        >
+                          {c.confirmed ? "Confrmed" : "Pending"}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            </Card>
 
-                  <div className={styles.collabRight}>
-                    <span className={styles.collabShare}>{c.share}% Share</span>
-                    <div className={styles.collabStatus}>
-                      <span
-                        className={`${styles.statusDot} ${
-                          c.confirmed ? styles.dotConfirmed : styles.dotPending
-                        }`}
-                      />
-                      <span
-                        className={`${styles.statusText} ${
-                          c.confirmed
-                            ? styles.textConfirmed
-                            : styles.textPending
-                        }`}
-                      >
-                        {c.confirmed ? "Confrmed" : "Pending"}
-                      </span>
-                    </div>
-                  </div>
+            <Card variant="light" className={styles.configCard}>
+              <div className={styles.configHeader}>
+                <h3>Configuration Setup</h3>
+                <span className={styles.confirmedBadge}>
+                  {split?.confirmedCount} / {split?.recipients.length} Confirmed
+                </span>
+              </div>
+
+              <p className={styles.configDescription}>
+                Waiting for all participants to confirm the current split ratios
+                before activating.
+              </p>
+
+              <div className={styles.progressTrack}>
+                <div
+                  className={styles.progressFill}
+                  style={{ width: `${progress * 100}%` }}
+                />
+              </div>
+
+              <hr className={styles.divider} />
+
+              <div className={styles.specSection}>
+                <h4 className={styles.specTitle}>TECHNICAL SPECIFICATIONS</h4>
+
+                <div className={styles.specRow}>
+                  <span className={styles.specLabel}>Split Address</span>
+                  <button
+                    onClick={handleCopyAddress}
+                    className={styles.copyAddressBtn}
+                  >
+                    <span>{formatAddress(split?.id || "")}</span>
+                    <Copy size={14} />
+                  </button>
                 </div>
-              ))}
-            </div>
-          </Card>
 
-          <Card variant="light" className={styles.configCard}>
-            <div className={styles.configHeader}>
-              <h3>Configuration Setup</h3>
-              <span className={styles.confirmedBadge}>
-                {split?.confirmedCount} / {split?.recipients.length} Confirmed
-              </span>
-            </div>
+                <div className={styles.specRow}>
+                  <span className={styles.specLabel}>Creator</span>
+                  <span className={styles.specValue}>
+                    {formatAddress(split?.creator || "")}
+                  </span>
+                </div>
 
-            <p className={styles.configDescription}>
-              Waiting for all participants to confirm the current split ratios
-              before activating.
-            </p>
+                <div className={styles.specRow}>
+                  <span className={styles.specLabel}>Distribution Engine</span>
+                  <span className={styles.engineBadge}>
+                    {split?.distributionType}
+                  </span>
+                </div>
 
-            <div className={styles.progressTrack}>
-              <div
-                className={styles.progressFill}
-                style={{ width: `${progress * 100}%` }}
-              />
-            </div>
-
-            <hr className={styles.divider} />
-
-            <div className={styles.specSection}>
-              <h4 className={styles.specTitle}>TECHNICAL SPECIFICATIONS</h4>
-
-              <div className={styles.specRow}>
-                <span className={styles.specLabel}>Split Address</span>
-                <button
-                  onClick={handleCopyAddress}
-                  className={styles.copyAddressBtn}
-                >
-                  <span>{formatAddress(split?.id || "")}</span>
-                  <Copy size={14} />
-                </button>
-              </div>
-
-              <div className={styles.specRow}>
-                <span className={styles.specLabel}>Creator</span>
-                <span className={styles.specValue}>
-                  {formatAddress(split?.creator || "")}
-                </span>
-              </div>
-
-              <div className={styles.specRow}>
-                <span className={styles.specLabel}>Distribution Engine</span>
-                <span className={styles.engineBadge}>
-                  {split?.distributionType}
-                </span>
-              </div>
-
-              {/* <div className={styles.specRow}>
+                {/* <div className={styles.specRow}>
                 <span className={styles.specLabel}>Smart Contract ID</span>
                 <span className={styles.specValue}>{data.smartContractId}</span>
               </div> */}
-            </div>
-          </Card>
+              </div>
+            </Card>
+          </div>
         </div>
-      </div>
+      )}
 
       <AddParticipantModal
         isOpen={isAddParticipantOpen}

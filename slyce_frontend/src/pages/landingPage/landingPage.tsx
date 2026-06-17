@@ -5,6 +5,7 @@ import type { Variants } from "framer-motion";
 import Button from "../../components/button/Button";
 import LoginModal from "../../components/loginModal/LoginModal";
 import styles from "./landingPage.module.css";
+import { useWalletConnection } from "@mysten/dapp-kit-react";
 
 const fadeUpVariant: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -22,6 +23,7 @@ const staggerContainer: Variants = {
 const LandingPage = () => {
   const navigate = useNavigate();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const connection = useWalletConnection();
 
   return (
     <div className={styles.container}>
@@ -62,13 +64,19 @@ const LandingPage = () => {
             </span>
           </nav>
           <div className={styles.headerActions}>
-            <Button
-              variant="ghost"
-              className={styles.navLink}
-              onClick={() => setIsLoginOpen(true)}
-            >
-              Log in
-            </Button>
+            {connection.isConnected ? (
+              <Button variant="ghost" className={styles.navLink} disabled>
+                Connected
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                className={styles.navLink}
+                onClick={() => setIsLoginOpen(true)}
+              >
+                Log in
+              </Button>
+            )}
             <Button variant="primary" onClick={() => navigate("/app")}>
               Launch App
             </Button>

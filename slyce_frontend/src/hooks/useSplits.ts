@@ -16,6 +16,7 @@ export interface CreateSplitInput {
   distributionType: "Manual" | "Threshold" | "Scheduled" | "Incoming";
   threshold: number;
   interval?: number;
+  currency: string;
 }
 
 export interface CreatedSplitResult {
@@ -57,6 +58,7 @@ export function useSplits() {
         distributionType: input.distributionType,
         threshold: input.threshold,
         interval: input.interval ?? 0,
+        targetCurrency: input.currency,
       };
 
       const tx = buildCreateSplitTx(splitData, hashedPasscodes, packageId);

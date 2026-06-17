@@ -2,9 +2,17 @@ import { useState } from "react";
 import Card from "../card/Card";
 import styles from "./SplitTable.module.css";
 import Pagination from "../pagination/Pagination";
-import type { Transaction } from "../../lib/types";
+import { formatAddress } from "../../lib/helpers";
+import LoadingState from "../loadingState/LoadingState";
+import Jazzicon from "react-jazzicon";
 
-const SplitTable = ({ splits }: { splits: Transaction[] }) => {
+const SplitTable = ({
+  splits,
+  loading = false,
+}: {
+  splits: any;
+  loading?: boolean;
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(splits.length / itemsPerPage) || 1;
@@ -38,37 +46,46 @@ const SplitTable = ({ splits }: { splits: Transaction[] }) => {
 
       <div className={styles.tableHeader}>
         <div>Split Title</div>
-        <div>Created Date</div>
+        <div>Creator</div>
         <div className={styles.headerAmount}>Distributed</div>
       </div>
 
       <div className={styles.transactionsList}>
-        {displayedSplits.map((split: Transaction) => (
-          <div key={split.id} className={styles.transactionItem}>
-            <div className={styles.txLeft}>
-              <div className={styles.txAvatar}>
-                <img src={split.image} alt={split.name} />
+        {loading ? (
+          <LoadingState message="Loadng splits..." />
+        ) : (
+          displayedSplits.map((split: any) => (
+            <div key={split.id} className={styles.transactionItem}>
+              <div className={styles.txLeft}>
+                <div className={styles.txAvatar}>
+                  {/* <Jazzicon diameter={22} seed={split.creator} /> */}
+                  {/* <img src={split.image} alt={split.name} /> */}
+                </div>
+
+                <div className={styles.txInfo}>
+                  <div className={styles.txName}>{split.name}</div>
+                </div>
               </div>
 
-              <div className={styles.txInfo}>
-                <div className={styles.txName}>{split.name}</div>
+              <div className={styles.txDate}>
+                {formatAddress(split.creator)}
+              </div>
+
+              <div className={styles.txAmountWrapper}>
+                <div
+                  className={
+                    split.totalUsd >= 0
+                      ? styles.txAmountPos
+                      : styles.txAmountNeg
+                  }
+                >
+                  {split.totalUsd >= 0 ? "+" : "-"}$
+                  {Math.abs(split.totalUsd).toFixed(2)}
+                </div>
               </div>
             </div>
-
-            <div className={styles.txDate}>{split.date}</div>
-
-            <div className={styles.txAmountWrapper}>
-              <div
-                className={
-                  split.amount > 0 ? styles.txAmountPos : styles.txAmountNeg
-                }
-              >
-                {split.amount > 0 ? "+" : "-"}$
-                {Math.abs(split.amount).toFixed(2)}
-              </div>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       <Pagination

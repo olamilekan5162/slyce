@@ -1,7 +1,9 @@
 import styles from "./Sidebar.module.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Home, ArrowUpDown, LogOut, User, Wallet } from "lucide-react";
 import Button from "../button/Button";
+import { dAppKit } from "../../lib/suiClient";
+import toast from "react-hot-toast";
 
 const links = [
   {
@@ -27,6 +29,14 @@ const links = [
 ];
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleDisconnect = async () => {
+    await dAppKit.disconnectWallet();
+    toast.success("Wallet disconnected successfully");
+    navigate("/");
+  };
+
   return (
     <aside className={styles.sidebar}>
       <div>
@@ -57,7 +67,7 @@ export default function Sidebar() {
         <Button
           variant="unstyled"
           className={styles.logoutBtn}
-          onClick={() => {}}
+          onClick={() => handleDisconnect()}
         >
           <LogOut size={20} />
           <span>Logout</span>

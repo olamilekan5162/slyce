@@ -17,7 +17,7 @@ export const useFetchSplitById = (splitId: string) => {
       });
 
       const splitData = object.json as any;
-      console.log("Data", splitData);
+
       const data = {
         id: splitData?.id ?? "",
         name: splitData?.name ?? "-",
@@ -29,6 +29,7 @@ export const useFetchSplitById = (splitId: string) => {
         confirmedCount: splitData?.confirmed_count ?? 0,
         threshold: splitData?.threshold ?? 0,
         interval: splitData?.interval ?? 0,
+        targetCurrency: splitData?.target_currency ?? "",
       };
       setSplit(data);
     } catch (err) {
