@@ -4,7 +4,7 @@ import styles from "./SplitTable.module.css";
 import Pagination from "../pagination/Pagination";
 import { formatAddress } from "../../lib/helpers";
 import LoadingState from "../loadingState/LoadingState";
-import Jazzicon from "react-jazzicon";
+// import Jazzicon from "react-jazzicon";
 
 const SplitTable = ({
   splits,

@@ -8,11 +8,37 @@ import TokensCard from "../../components/tokensCard/TokensCard";
 import { useNavigate } from "react-router-dom";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { useBalances } from "../../hooks/useBalances";
+import { useFetchSplits } from "../../hooks/useFetchSplits";
+import { formatAddress } from "../../lib/helpers";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const currentAccount = useCurrentAccount();
   const { totalBalance } = useBalances(currentAccount?.address);
+  const { splits } = useFetchSplits(false);
+
+  const lastSplit = splits?.at(-1);
+
+  const getDistType = (type: number) => {
+    switch (type) {
+      case 0:
+        return "Manual";
+      case 1:
+        return "Threshold";
+      case 2:
+        return "Scheduled";
+      case 3:
+        return "Automated";
+      default:
+        return "Unknown";
+    }
+  };
+
+  const share = lastSplit?.recipients.find((recipient) =>
+    recipient?.contact
+      ?.toLocaleLowerCase()
+      .includes(currentAccount?.address?.toLocaleLowerCase() || ""),
+  );
 
   return (
     <div className={styles.dashboard}>
@@ -68,26 +94,39 @@ const Dashboard = () => {
                   <div className={styles.splitTotalLabel}>
                     Total Distributed
                   </div>
-                  <div className={styles.splitTotalAmount}>$850</div>
+                  <div className={styles.splitTotalAmount}>
+                    ${lastSplit?.totalUsd || 0}
+                  </div>
                 </div>
               </Card>
 
               <div className={styles.splitDetailsGrid}>
                 <div className={`${styles.detailCol} ${styles.borderDark}`}>
                   <div className={styles.detailLabel}>Creator</div>
-                  <div className={styles.detailValue}>0x234...2345</div>
+                  <div className={styles.detailValue}>
+                    {formatAddress(lastSplit?.creator) || 0x00}
+                  </div>
                 </div>
                 <div className={`${styles.detailCol} ${styles.borderBlue}`}>
                   <div className={styles.detailLabel}>Distribution Type</div>
-                  <div className={styles.detailValue}>Manual</div>
+                  <div className={styles.detailValue}>
+                    {getDistType(Number(lastSplit?.distributionType))}
+                  </div>
                 </div>
                 <div className={`${styles.detailCol} ${styles.borderGreen}`}>
                   <div className={styles.detailLabel}>Share</div>
-                  <div className={styles.detailValue}>40%</div>
+                  <div className={styles.detailValue}>
+                    {share?.share / 100 || 0}%
+                  </div>
                 </div>
                 <div className={`${styles.detailCol} ${styles.borderOrange}`}>
                   <div className={styles.detailLabel}>Received</div>
-                  <div className={styles.detailValue}>$100</div>
+                  <div className={styles.detailValue}>
+                    $
+                    {(
+                      (lastSplit?.totalUsd || 0) * (share?.share / 10000 || 1)
+                    ).toFixed(2)}
+                  </div>
                 </div>
               </div>
             </div>
