@@ -13,6 +13,7 @@ export interface SplitRecipient {
   address?: string;
   share: number; // basis points (e.g. 5000 = 50%)
   confirmed: boolean;
+  passcode_hash?: string;
 }
 
 export interface TokenOption {
@@ -69,6 +70,7 @@ export interface RecipientForm {
   address: string;
   share: string;
   type: RecipientType;
+  passcodeHash?: string;
 }
 // ── Activity Types ─────────────────────────────────────────────
 

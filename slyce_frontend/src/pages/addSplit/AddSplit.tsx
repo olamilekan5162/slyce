@@ -10,6 +10,7 @@ import { useSplits } from "../../hooks/useSplits";
 import { useTokens } from "../../hooks/useTokens";
 import type { RecipientForm, RecipientType, TokenOption } from "../../types";
 import toast from "react-hot-toast";
+import { useFetchSplitById } from "../../hooks/useFetchSplitById";
 
 const determineType = (value: string): RecipientType => {
   if (value.startsWith("0x") && value.length > 30) return "address";
@@ -19,7 +20,7 @@ const determineType = (value: string): RecipientType => {
 
 export default function AddSplit() {
   const { id } = useParams();
-  const { createSplit, creating } = useSplits();
+  const { createSplit, creating, updateSplit, updating } = useSplits();
   const [splitName, setSplitName] = useState("");
   const [selectedToken, setSelectedToken] = useState<TokenOption>({
     id: "any",
@@ -39,6 +40,7 @@ export default function AddSplit() {
   const currentAccount = useCurrentAccount();
   const { tokens: userTokens } = useTokens(currentAccount?.address ?? "");
   const isEdit = !!id;
+  const { split } = useFetchSplitById(id || "");
 
   const tokenOptions: TokenOption[] = [
     { id: "any", symbol: "ANY", name: "Any Asset", iconUrl: "" },
@@ -52,38 +54,59 @@ export default function AddSplit() {
 
   useEffect(() => {
     let cancelled = false;
-    const initialize = () => {
-      if (id) {
+    const initialize = async () => {
+      if (id && split) {
         if (!cancelled) {
-          setParticipants([
-            { address: "0x71C5...3B21", share: "40", type: "address" },
-            { address: "0x44A5...9F02", share: "25", type: "address" },
-            { address: "0x99B2...1C44", share: "20", type: "address" },
-            { address: "0x22D3...8E11", share: "15", type: "address" },
-          ]);
-          setSplitName("SPlit Name Here");
-          // setSelectedToken(tokenOptions[1]);
+          setSplitName(split.name);
+          const dtMap: Record<number, string> = {
+            0: "Manual Trigger",
+            1: "Threshold Trigger",
+            2: "Scheduled Trigger",
+            3: "Automated Trigger",
+          };
+          setDistributionEngine(
+            dtMap[Number(split.distributionType)] || "Automated Trigger"
+          );
+          setThresholdValue((split.threshold || 0).toString());
+          setParticipants(
+            split.recipients.map((r: any) => ({
+              address: r.contact,
+              share: (Number(r.share) / 100).toString(),
+              type:
+                r.contact.startsWith("0x") && r.contact.length > 30
+                  ? "address"
+                  : "contact",
+              passcodeHash: r.passcode_hash || "",
+            }))
+          );
+          if (split.targetCurrency) {
+            const t = tokenOptions.find(
+              (t) => t.symbol === split.targetCurrency
+            );
+            if (t) setSelectedToken(t);
+          }
         }
+      } else if (!id) {
+        setParticipants([
+          {
+            address: currentAccount?.address || "",
+            share: "60",
+            type: "address",
+          },
+          { address: "", share: "40", type: "contact" },
+        ]);
       }
-      setParticipants([
-        {
-          address: currentAccount?.address || "",
-          share: "60",
-          type: "address",
-        },
-        { address: "", share: "40", type: "contact" },
-      ]);
     };
 
     initialize();
     return () => {
       cancelled = true;
     };
-  }, [currentAccount?.address, id]);
+  }, [currentAccount?.address, id, split]);
 
   const totalShareSum = participants.reduce(
     (sum, p) => sum + (parseFloat(p.share) || 0),
-    0,
+    0
   );
 
   const handleAddParticipant = () => {
@@ -102,7 +125,7 @@ export default function AddSplit() {
   const handleParticipantChange = (
     index: number,
     field: "address" | "share",
-    value: string,
+    value: string
   ) => {
     const updated = participants.map((p, i) => {
       if (i === index) {
@@ -138,10 +161,38 @@ export default function AddSplit() {
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (totalShareSum !== 100 || !currentAccount) return;
+
     if (isEdit) {
-      toast.error("Edit not supported");
+      if (!id) return;
+      const toastId = toast.loading("Updating split...");
+      try {
+        const distType = getDistType();
+        const result = await updateSplit(
+          {
+            name: splitName,
+            recipients: participants.map((p) => ({
+              identifier: p.address,
+              type: p.type,
+              share: parseFloat(p.share),
+              passcodeHash: p.passcodeHash,
+            })),
+            distributionType: distType,
+            threshold:
+              distType === "Threshold" ? parseFloat(thresholdValue || "0") : 0,
+            currency: selectedToken.symbol,
+          },
+          id
+        );
+        setCreatedSplitId(result.splitId);
+        setInvitePasscodes(result.passcodes);
+        toast.success("Split updated successfully", { id: toastId });
+      } catch (err: any) {
+        console.log(err);
+        toast.error(err.message, { id: toastId });
+      }
       return;
     }
+
     const toastId = toast.loading("Creating split...");
 
     try {
@@ -177,35 +228,54 @@ export default function AddSplit() {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.pageTitle}>Split Created!</h1>
+          <h1 className={styles.pageTitle}>
+            {isEdit ? "Split Updated!" : "Split Created!"}
+          </h1>
           <p className={styles.pageSubtitle}>
-            Your split is live on testnet. Share these invites.
+            {isEdit
+              ? inviteRecipients.length > 0
+                ? "Your split has been successfully updated. Share these invites with your new participants."
+                : "Your split has been successfully updated."
+              : "Your split is live on testnet. Share these invites."}
           </p>
         </div>
-        <div className={styles.invitesContainer}>
-          {inviteRecipients.map((r, i) => {
-            const link = `${window.location.origin}/confirm/${createdSplitId}?code=${invitePasscodes[i]}`;
-            return (
-              <Card key={i} variant="light" className={styles.inviteCard}>
-                <p className={styles.inviteLabel}>
-                  {r.address || `Recipient ${i + 1}`}
-                </p>
-                <p className={styles.inviteLink}>{link}</p>
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    navigator.clipboard.writeText(link);
-                    setCopiedIndex(i);
-                    setTimeout(() => setCopiedIndex(null), 2000);
-                  }}
-                >
-                  <Copy size={16} />
-                  {copiedIndex === i ? "Copied!" : "Copy Link"}
-                </Button>
-              </Card>
-            );
-          })}
-        </div>
+
+        {inviteRecipients.length > 0 ? (
+          <div className={styles.invitesContainer}>
+            {inviteRecipients.map((r, i) => {
+              // We need the original index to map to the correct passcode
+              const originalIndex = participants.findIndex((p) => p === r);
+              const link = `${window.location.origin}/confirm/${createdSplitId}?code=${invitePasscodes[originalIndex]}`;
+              return (
+                <Card key={i} variant="light" className={styles.inviteCard}>
+                  <p className={styles.inviteLabel}>
+                    {r.address || `Recipient ${originalIndex + 1}`}
+                  </p>
+                  <p className={styles.inviteLink}>{link}</p>
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      navigator.clipboard.writeText(link);
+                      setCopiedIndex(i);
+                      setTimeout(() => setCopiedIndex(null), 2000);
+                    }}
+                  >
+                    <Copy size={16} />
+                    {copiedIndex === i ? "Copied!" : "Copy Link"}
+                  </Button>
+                </Card>
+              );
+            })}
+          </div>
+        ) : (
+          <div
+            style={{ display: "flex", justifyContent: "center", marginTop: 32 }}
+          >
+            <Button variant="primary" onClick={() => window.history.back()}>
+              Return to Splits
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -245,7 +315,9 @@ export default function AddSplit() {
                 >
                   <div className={styles.tokenSelectorLeft}>
                     <div
-                      className={`${styles.tokenIconWrapper} ${styles[selectedToken.symbol.toLowerCase()]}`}
+                      className={`${styles.tokenIconWrapper} ${
+                        styles[selectedToken.symbol.toLowerCase()]
+                      }`}
                     >
                       {selectedToken.symbol === "ANY" ? (
                         <span className={styles.anyIconText}>*</span>
@@ -282,7 +354,9 @@ export default function AddSplit() {
                         className={styles.tokenSelectorDropdownItem}
                       >
                         <div
-                          className={`${styles.tokenIconWrapper} ${styles[token.symbol.toLowerCase()]}`}
+                          className={`${styles.tokenIconWrapper} ${
+                            styles[token.symbol.toLowerCase()]
+                          }`}
                         >
                           {token.symbol === "ANY" ? (
                             <span className={styles.anyIconText}>*</span>
@@ -340,7 +414,7 @@ export default function AddSplit() {
                         handleParticipantChange(
                           index,
                           "address",
-                          e.target.value,
+                          e.target.value
                         )
                       }
                       className={styles.textInput}
@@ -360,7 +434,7 @@ export default function AddSplit() {
                           handleParticipantChange(
                             index,
                             "share",
-                            e.target.value,
+                            e.target.value
                           )
                         }
                         className={styles.shareInput}
@@ -388,12 +462,20 @@ export default function AddSplit() {
                 <span className={styles.totalSplitLabel}>Total Split</span>
                 <div className={styles.progressBarTrack}>
                   <div
-                    className={`${styles.progressBarFill} ${totalShareSum === 100 ? styles.progressSuccess : styles.progressWarning}`}
+                    className={`${styles.progressBarFill} ${
+                      totalShareSum === 100
+                        ? styles.progressSuccess
+                        : styles.progressWarning
+                    }`}
                     style={{ width: `${Math.min(totalShareSum, 100)}%` }}
                   />
                 </div>
                 <span
-                  className={`${styles.totalSplitPercentage} ${totalShareSum === 100 ? styles.textSuccess : styles.textWarning}`}
+                  className={`${styles.totalSplitPercentage} ${
+                    totalShareSum === 100
+                      ? styles.textSuccess
+                      : styles.textWarning
+                  }`}
                 >
                   {totalShareSum}%
                 </span>
@@ -466,11 +548,19 @@ export default function AddSplit() {
             type="submit"
             variant="primary"
             className={styles.submitBtn}
-            disabled={totalShareSum !== 100 || creating || !currentAccount}
+            disabled={
+              totalShareSum !== 100 || creating || updating || !currentAccount
+            }
           >
             <Check size={18} />
             <span>
-              {creating ? "Creating..." : isEdit ? "Save Changes" : "Add Split"}
+              {creating || updating
+                ? isEdit
+                  ? "Updating..."
+                  : "Creating..."
+                : isEdit
+                ? "Save Changes"
+                : "Add Split"}
             </span>
           </Button>
         </Card>

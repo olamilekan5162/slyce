@@ -2,25 +2,34 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../card/Card";
 import styles from "./TransactionTable.module.css";
-import { ChevronRight } from "lucide-react";
+import {
+  ChevronRight,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Activity as ActivityIcon,
+} from "lucide-react";
 import Pagination from "../pagination/Pagination";
-import type { Transaction } from "../../lib/types";
+import type { Activity } from "../../types";
+import LoadingState from "../loadingState/LoadingState";
+import EmptyState from "../emptyState/EmptyState";
 
 const TransactionTable = ({
-  transactions,
+  activities,
   isDashboard = false,
+  loading = false,
 }: {
-  transactions: Transaction[];
+  activities: Activity[];
   isDashboard?: boolean;
+  loading?: boolean;
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const totalPages = Math.ceil(transactions.length / itemsPerPage) || 1;
-  const displayedTransactions = isDashboard
-    ? transactions
-    : transactions.slice(
+  const totalPages = Math.ceil(activities?.length / itemsPerPage) || 1;
+  const displayedActivities = isDashboard
+    ? activities
+    : activities?.slice(
         (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage,
+        currentPage * itemsPerPage
       );
 
   return (
@@ -48,7 +57,6 @@ const TransactionTable = ({
             <div className={styles.filters}>
               <div className={styles.filterGroup}>
                 <span>Sort by</span>
-
                 <select className={styles.select}>
                   <option>Latest</option>
                   <option>Oldest</option>
@@ -57,84 +65,107 @@ const TransactionTable = ({
 
               <div className={styles.filterGroup}>
                 <span>Category</span>
-
                 <select className={styles.select}>
                   <option>All Transactions</option>
-                  <option>General</option>
-                  <option>Dining Out</option>
-                  <option>Groceries</option>
-                  <option>Entertainment</option>
+                  <option>Receive</option>
+                  <option>Split</option>
                 </select>
               </div>
             </div>
           </div>
         </>
       )}
+
       {!isDashboard && (
         <div className={styles.tableHeader}>
-          <div>Recipient / Sender</div>
+          <div>Type</div>
           <div>Category</div>
           <div>Transaction Date</div>
           <div className={styles.headerAmount}>Amount</div>
         </div>
       )}
 
-      <div className={styles.transactionsList}>
-        {displayedTransactions.map((transaction: Transaction) => (
-          <div
-            key={transaction.id}
-            className={`${styles.transactionItem} ${
-              isDashboard ? styles.dashboardItem : ""
-            }`}
-          >
-            <div className={styles.txLeft}>
-              <div className={styles.txAvatar}>
-                <img src={transaction.image} alt={transaction.name} />
-              </div>
-
-              <div className={styles.txInfo}>
-                <div className={styles.txName}>{transaction.name}</div>
-              </div>
-            </div>
-
-            {isDashboard ? (
-              <div className={styles.txRight}>
+      {loading ? (
+        <LoadingState message="Loading activities..." />
+      ) : activities?.length === 0 ? (
+        <EmptyState
+          title="No transactions yet"
+          icon={<ActivityIcon size={32} />}
+          description="You do not have a valid transaction yet"
+        />
+      ) : (
+        <div className={styles.transactionsList}>
+          {displayedActivities?.map((activity: Activity) => (
+            <div
+              key={activity?.id}
+              className={`${styles.transactionItem} ${
+                isDashboard ? styles.dashboardItem : ""
+              }`}
+            >
+              <div className={styles.txLeft}>
                 <div
-                  className={
-                    transaction.amount > 0
-                      ? styles.txAmountPos
-                      : styles.txAmountNeg
-                  }
+                  className={styles.txAvatar}
+                  style={{
+                    background: "#f3f4f6",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  {transaction.amount > 0 ? "+" : "-"}$
-                  {Math.abs(transaction.amount).toFixed(2)}
+                  {activity?.type === "receive" ? (
+                    <ArrowDownLeft size={20} color="#2E7D6E" />
+                  ) : (
+                    <ArrowUpRight size={20} color="#E07A5F" />
+                  )}
                 </div>
-                <div className={styles.txDate}>{transaction.date}</div>
-              </div>
-            ) : (
-              <>
-                <div className={styles.txCategory}>{transaction.category}</div>
-                <div className={styles.txDate}>{transaction.date}</div>
 
-                <div className={styles.txAmountWrapper}>
+                <div className={styles.txInfo}>
+                  <div className={styles.txName}>{activity?.title}</div>
+                </div>
+              </div>
+
+              {isDashboard ? (
+                <div className={styles.txRight}>
                   <div
                     className={
-                      transaction.amount > 0
+                      activity?.type === "receive"
                         ? styles.txAmountPos
                         : styles.txAmountNeg
                     }
                   >
-                    {transaction.amount > 0 ? "+" : "-"}$
-                    {Math.abs(transaction.amount).toFixed(2)}
+                    {activity?.amount}
                   </div>
+                  <div className={styles.txDate}>{activity?.time}</div>
                 </div>
-              </>
-            )}
-          </div>
-        ))}
-      </div>
+              ) : (
+                <>
+                  <div
+                    className={styles.txCategory}
+                    style={{ textTransform: "capitalize" }}
+                  >
+                    {activity?.type}
+                  </div>
+                  <div className={styles.txDate}>{activity?.date}</div>
 
-      {!isDashboard && (
+                  <div className={styles.txAmountWrapper}>
+                    <div
+                      className={
+                        activity?.type === "receive"
+                          ? styles.txAmountPos
+                          : styles.txAmountNeg
+                      }
+                    >
+                      {activity?.amount}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isDashboard && !loading && activities?.length > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

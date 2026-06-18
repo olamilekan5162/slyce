@@ -16,6 +16,7 @@ export default function SplitDetails() {
   const navigate = useNavigate();
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
   const { split, loading } = useFetchSplitById(id || "");
+  console.log(split);
 
   const progress =
     (split?.confirmedCount || 0) / (split?.recipients.length || 0);

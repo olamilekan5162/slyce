@@ -49,7 +49,10 @@ const Splits = () => {
           title="No splits found"
           description="You haven't joined or created any splits yet."
           action={
-            <Button variant="primary" onClick={() => navigate("/app/splits/new")}>
+            <Button
+              variant="primary"
+              onClick={() => navigate("/app/splits/new")}
+            >
               <PlusIcon size={18} style={{ marginRight: 8 }} />
               Create your first split
             </Button>

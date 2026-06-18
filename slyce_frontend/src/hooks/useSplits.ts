@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
-import { buildConfirmSplitTx, getPackageId } from "../lib/contract";
+import {
+  buildConfirmSplitTx,
+  buildDistributeVaultTx,
+  buildUpdateSplitTx,
+  getPackageId,
+} from "../lib/contract";
 import { buildCreateSplitTx } from "../lib/contract";
 import { hashPasscode } from "../lib/helpers";
 import type { RecipientType, SplitFormData } from "../types";
@@ -12,6 +17,7 @@ export interface CreateSplitInput {
     identifier: string; // email, address, or name
     type: RecipientType;
     share: number; // percentage (e.g. 50 = 50%)
+    passcodeHash?: string;
   }[];
   distributionType: "Manual" | "Threshold" | "Scheduled" | "Incoming";
   threshold: number;
@@ -29,6 +35,7 @@ export function useSplits() {
   const currentAccount = useCurrentAccount();
   const dAppKit = useDAppKit();
   const [creating, setCreating] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   const createSplit = async (
     input: CreateSplitInput,
@@ -89,6 +96,73 @@ export function useSplits() {
     }
   };
 
+  const updateSplit = async (
+    input: CreateSplitInput,
+    splitId: string,
+  ): Promise<CreatedSplitResult> => {
+    if (!currentAccount) throw new Error("Wallet not connected");
+    setUpdating(true);
+
+    try {
+      const packageId = getPackageId();
+      if (!packageId) throw new Error("Contract not deployed");
+
+      const passcodes = input.recipients.map((r, i) =>
+        r.passcodeHash
+          ? ""
+          : i === 0
+            ? ""
+            : Math.random().toString(36).substring(2, 8).toUpperCase(),
+      );
+
+      const hashedPasscodes = await Promise.all(
+        input.recipients.map(async (r, i) => {
+          if (r.passcodeHash) {
+            const binaryString = atob(r.passcodeHash);
+            return Array.from(binaryString).map((char) => char.charCodeAt(0));
+          }
+          return hashPasscode(passcodes[i]);
+        }),
+      );
+
+      const splitData: SplitFormData = {
+        name: input.name,
+        recipients: input.recipients.map((r) => ({
+          contact: r.identifier,
+          address: r.type === "address" ? r.identifier : "0x0",
+          share: r.share,
+        })),
+        distributionType: input.distributionType,
+        threshold: input.threshold,
+        interval: input.interval ?? 0,
+        targetCurrency: input.currency,
+      };
+
+      const tx = buildUpdateSplitTx(
+        splitData,
+        hashedPasscodes,
+        packageId,
+        splitId,
+      );
+
+      const result = await dAppKit.signAndExecuteTransaction({
+        transaction: tx,
+      });
+
+      if (result.$kind === "FailedTransaction") {
+        throw new Error("Transaction failed");
+      }
+
+      return {
+        digest: result.Transaction.digest,
+        splitId,
+        passcodes,
+      };
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const confirmSplit = async (
     splitId: string,
     recipientIndex: number,
@@ -113,9 +187,27 @@ export function useSplits() {
     return result.Transaction.digest;
   };
 
+  const distributeVault = async (splitId: string): Promise<string> => {
+    if (!currentAccount) throw new Error("Wallet not connected");
+    const packageId = getPackageId();
+    if (!packageId) throw new Error("Contract not deployed");
+
+    const tx = buildDistributeVaultTx(splitId, packageId);
+
+    const result = await dAppKit.signAndExecuteTransaction({
+      transaction: tx,
+    });
+    if (result.$kind === "FailedTransaction")
+      throw new Error("Transaction failed");
+    return result.Transaction.digest;
+  };
+
   return {
+    distributeVault,
     createSplit,
     confirmSplit,
+    updateSplit,
+    updating,
     creating,
     isConnected: !!currentAccount,
     address: currentAccount?.address ?? null,

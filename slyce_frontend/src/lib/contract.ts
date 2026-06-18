@@ -67,6 +67,51 @@ export function buildCreateSplitTx(
   return tx;
 }
 
+export function buildUpdateSplitTx(
+  data: SplitFormData,
+  passcodeHashes: number[][],
+  packageId: string,
+  splitId: string,
+): Transaction {
+  const tx = new Transaction();
+
+  const distributionType =
+    (
+      {
+        Manual: 0,
+        Threshold: 1,
+        Scheduled: 2,
+        Incoming: 3,
+      } as const
+    )[data.distributionType] ?? 0;
+
+  const shares = data.recipients.map((r) => BigInt(Math.round(r.share * 100)));
+
+  tx.moveCall({
+    target: `${packageId}::slyce::update_split`,
+    arguments: [
+      tx.object(splitId),
+      tx.pure.string(data.name),
+      tx.pure.vector(
+        "string",
+        data.recipients.map((r) => r.contact),
+      ),
+      tx.pure.vector(
+        "address",
+        data.recipients.map((r) => r.address || "0x0"),
+      ),
+      tx.pure.vector("u64", shares),
+      tx.pure.vector("vector<u8>", passcodeHashes),
+      tx.pure.u8(distributionType),
+      tx.pure.u64(data.threshold),
+      tx.pure.u64(data.interval),
+      tx.pure.option("string", data.targetCurrency),
+    ],
+  });
+
+  return tx;
+}
+
 /**
  * Build a PTB for confirming a split.
  * Calls `slyce::slyce::confirm_split`.
@@ -143,14 +188,11 @@ export function buildDepositToVaultTx(
  */
 export function buildDistributeVaultTx(
   splitId: string,
-  coinType: string,
   packageId: string,
 ): Transaction {
   const tx = new Transaction();
-
   tx.moveCall({
     target: `${packageId}::slyce::distribute_vault`,
-    typeArguments: [coinType],
     arguments: [tx.object(getProtocolConfigId()), tx.object(splitId)],
   });
 

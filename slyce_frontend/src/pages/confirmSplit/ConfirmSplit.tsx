@@ -1,65 +1,82 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import Button from "../../components/button/Button";
 import LoginModal from "../../components/loginModal/LoginModal";
 import styles from "./ConfirmSplit.module.css";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { useFetchSplitById } from "../../hooks/useFetchSplitById";
+import { useSplits } from "../../hooks/useSplits";
+import toast from "react-hot-toast";
 
 const PASSCODE_LENGTH = 6;
 
 export default function ConfirmSplit() {
+  const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const urlCode = searchParams.get("code");
+  const navigate = useNavigate();
+
+  const currentAccount = useCurrentAccount();
+  const { split, loading: splitLoading } = useFetchSplitById(id || "");
+  const { confirmSplit } = useSplits();
+
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [passcode, setPasscode] = useState<string[]>(
     Array(PASSCODE_LENGTH).fill(""),
   );
+  const [isConfirming, setIsConfirming] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const data = {
-    title: "Project Alpha Royalties",
-    yourShare: 15,
-    confirmed: 3,
-    total: 4,
-    collaborators: [
-      {
-        id: "c1",
-        name: "Alex Morgan",
-        address: "0x71C5...3B21",
-        avatar: "AM",
-        share: 40,
-        status: "Confirmed" as const,
-        avatarClass: styles.avatarDark,
-      },
-      {
-        id: "c2",
-        name: "Sarah Jenkins",
-        address: "0x44A5...9F02",
-        avatar: "SJ",
-        share: 25,
-        status: "Confirmed" as const,
-        avatarClass: styles.avatarPurple,
-      },
-      {
-        id: "c3",
-        name: "David Kim",
-        address: "0x99B2...1C44",
-        avatar: "DK",
-        share: 20,
-        status: "Confirmed" as const,
-        avatarClass: styles.avatarBlue,
-      },
-      {
-        id: "c4",
-        name: "Mia Lin (You)",
-        address: "0x22D3...8E11",
-        avatar: "ML",
-        share: 15,
-        status: "Pending" as const,
-        avatarClass: styles.avatarGrey,
-      },
-    ],
-  };
+  // Pre-fill passcode if provided in URL
+  useEffect(() => {
+    if (urlCode && urlCode.length === PASSCODE_LENGTH) {
+      setPasscode(urlCode.split(""));
+    }
+  }, [urlCode]);
 
-  const progress = data.confirmed / data.total;
-  const isConnected = false;
+  const { total, confirmed, collaborators, yourShare, recipientIndex } = useMemo(() => {
+    if (!split) {
+      return { total: 0, confirmed: 0, collaborators: [], yourShare: 0, recipientIndex: -1 };
+    }
+
+    let userShare = 0;
+    let rIndex = -1;
+    const collabs = split.recipients.map((r: any, index: number) => {
+      const isYou = r.contact === currentAccount?.address;
+      if (isYou) {
+        userShare = Number(r.share) / 100; // Convert basis points to % if stored as 1500 -> 15%
+        rIndex = index;
+      }
+      return {
+        id: index.toString(),
+        name: isYou ? "You" : r.contact.slice(0, 6) + "..." + r.contact.slice(-4),
+        address: r.contact,
+        avatar: isYou ? "U" : r.contact.slice(2, 4).toUpperCase(),
+        share: Number(r.share) / 100,
+        status: r.has_confirmed ? "Confirmed" : "Pending",
+        avatarClass: isYou ? styles.avatarPurple : styles.avatarGrey,
+      };
+    });
+
+    const confCount = collabs.filter((c) => c.status === "Confirmed").length;
+    
+    // Check if user is already confirmed
+    if (rIndex !== -1 && collabs[rIndex].status === "Confirmed") {
+      setIsConfirmed(true);
+    }
+
+    return {
+      total: collabs.length,
+      confirmed: confCount,
+      collaborators: collabs,
+      yourShare: userShare,
+      recipientIndex: rIndex,
+    };
+  }, [split, currentAccount]);
+
+  const progress = total > 0 ? confirmed / total : 0;
+  const isConnected = !!currentAccount;
 
   const handlePasscodeChange = (index: number, value: string) => {
     if (value.length > 1) {
@@ -75,10 +92,10 @@ export default function ConfirmSplit() {
       inputRefs.current[targetIndex]?.focus();
       return;
     }
-    if (!/^\d*$/.test(value)) return;
+    if (value && !/^[A-Za-z0-9]*$/.test(value)) return;
     setPasscode((prev) => {
       const next = [...prev];
-      next[index] = value;
+      next[index] = value.toUpperCase();
       return next;
     });
     if (value && index < PASSCODE_LENGTH - 1) {
@@ -98,7 +115,7 @@ export default function ConfirmSplit() {
   const handlePaste = useCallback(
     (e: React.ClipboardEvent<HTMLInputElement>) => {
       e.preventDefault();
-      const pasted = e.clipboardData.getData("text").replace(/\D/g, "");
+      const pasted = e.clipboardData.getData("text").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
       const chars = pasted.slice(0, PASSCODE_LENGTH).split("");
       setPasscode((prev) => {
         const next = [...prev];
@@ -113,14 +130,48 @@ export default function ConfirmSplit() {
     [],
   );
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const code = passcode.join("");
     if (code.length !== PASSCODE_LENGTH) return;
-    setIsConfirmed(true);
+    if (recipientIndex === -1) {
+      toast.error("Your connected wallet is not a recipient of this split.");
+      return;
+    }
+    
+    setIsConfirming(true);
+    const toastId = toast.loading("Confirming your participation...");
+    
+    try {
+      const passcodeArray = Array.from(new TextEncoder().encode(code));
+      await confirmSplit(split.id, recipientIndex, passcodeArray);
+      toast.success("Successfully confirmed split!", { id: toastId });
+      setIsConfirmed(true);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to confirm split.", { id: toastId });
+    } finally {
+      setIsConfirming(false);
+    }
   };
 
   const fullPasscode = passcode.join("");
   const isPasscodeComplete = fullPasscode.length === PASSCODE_LENGTH;
+
+  if (splitLoading) {
+    return (
+      <div className={styles.page}>
+        <p>Loading split details...</p>
+      </div>
+    );
+  }
+
+  if (!split) {
+    return (
+      <div className={styles.page}>
+        <p>Split not found.</p>
+      </div>
+    );
+  }
 
   if (isConfirmed) {
     return (
@@ -144,9 +195,18 @@ export default function ConfirmSplit() {
             </div>
             <h2 className={styles.successTitle}>Split Confirmed!</h2>
             <p className={styles.successDesc}>
-              You've confirmed your {data.yourShare}% share in{" "}
-              <strong>{data.title}</strong>.
+              You've confirmed your {yourShare}% share in{" "}
+              <strong>{split.name}</strong>.
             </p>
+            <Button
+              variant="primary"
+              size="lg"
+              className={styles.actionBtn}
+              onClick={() => navigate(`/app/splits/${split.id}`)}
+              style={{ marginTop: 24 }}
+            >
+              View Split Dashboard
+            </Button>
           </div>
         </div>
       </div>
@@ -176,9 +236,9 @@ export default function ConfirmSplit() {
           <div className={styles.shareSection}>
             <span className={styles.shareLabel}>Your share</span>
             <div className={styles.shareCircle}>
-              <span className={styles.sharePercent}>{data.yourShare}%</span>
+              <span className={styles.sharePercent}>{yourShare}%</span>
             </div>
-            <span className={styles.shareTitle}>{data.title}</span>
+            <span className={styles.shareTitle}>{split.name}</span>
           </div>
 
           <div className={styles.divider} />
@@ -187,7 +247,7 @@ export default function ConfirmSplit() {
           <div className={styles.participantsSection}>
             <span className={styles.sectionTitle}>Participants</span>
             <div className={styles.participantRows}>
-              {data.collaborators.map((c) => (
+              {collaborators.map((c: any) => (
                 <div key={c.id} className={styles.participantRow}>
                   <div className={styles.participantLeft}>
                     <div className={`${styles.avatar} ${c.avatarClass}`}>
@@ -224,7 +284,7 @@ export default function ConfirmSplit() {
                 />
               </div>
               <span className={styles.progressCount}>
-                {data.confirmed}/{data.total} confirmed
+                {confirmed}/{total} confirmed
               </span>
             </div>
           </div>
@@ -257,7 +317,7 @@ export default function ConfirmSplit() {
                       inputRefs.current[index] = el;
                     }}
                     type="text"
-                    inputMode="numeric"
+                    inputMode="text"
                     maxLength={index === 0 ? PASSCODE_LENGTH : 1}
                     value={passcode[index]}
                     onChange={(e) =>
@@ -266,8 +326,8 @@ export default function ConfirmSplit() {
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={index === 0 ? handlePaste : undefined}
                     className={styles.otpInput}
-                    autoFocus={index === 0}
-                    aria-label={`Passcode digit ${index + 1}`}
+                    autoFocus={index === 0 && !isPasscodeComplete}
+                    aria-label={`Passcode character ${index + 1}`}
                   />
                 ))}
               </div>
@@ -276,9 +336,9 @@ export default function ConfirmSplit() {
                 size="lg"
                 className={styles.actionBtn}
                 onClick={handleConfirm}
-                disabled={!isPasscodeComplete}
+                disabled={!isPasscodeComplete || isConfirming || recipientIndex === -1}
               >
-                Confirm Split
+                {isConfirming ? "Confirming..." : "Confirm Split"}
               </Button>
             </div>
           )}
