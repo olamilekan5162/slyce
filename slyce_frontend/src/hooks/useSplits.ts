@@ -6,6 +6,7 @@ import {
   buildDistributeVaultTx,
   buildUpdateSplitTx,
   getPackageId,
+  getProtocolConfigId,
 } from "../lib/contract";
 import { buildCreateSplitTx } from "../lib/contract";
 import { hashPasscode } from "../lib/helpers";
@@ -190,9 +191,10 @@ export function useSplits() {
   const distributeVault = async (splitId: string): Promise<string> => {
     if (!currentAccount) throw new Error("Wallet not connected");
     const packageId = getPackageId();
+    const protocolConfigId = getProtocolConfigId();
     if (!packageId) throw new Error("Contract not deployed");
 
-    const tx = buildDistributeVaultTx(splitId, packageId);
+    const tx = buildDistributeVaultTx(splitId, packageId, protocolConfigId);
 
     const result = await dAppKit.signAndExecuteTransaction({
       transaction: tx,

@@ -11,13 +11,14 @@ import { formatAddress } from "@mysten/sui/utils";
 import toast from "react-hot-toast";
 import LoadingState from "../../components/loadingState/LoadingState";
 import { getDistType } from "../../lib/helpers";
+import { useSplits } from "../../hooks/useSplits";
 
 export default function SplitDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
   const { split, loading } = useFetchSplitById(id || "");
-  console.log(split);
+  const { distributeVault } = useSplits();
 
   const progress =
     (split?.confirmedCount || 0) / (split?.recipients.length || 0);
@@ -27,8 +28,14 @@ export default function SplitDetails() {
     toast.success("Split address copied to clipboard!");
   };
 
-  const handleDistribute = () => {
-    console.log("distribute");
+  const handleDistribute = async (splitId: string) => {
+    const toastId = toast.loading("Distributing split...");
+    try {
+      await distributeVault(splitId);
+      toast.success("Split distributed successfully!", { id: toastId });
+    } catch (err: any) {
+      toast.error(err.message ?? "Distribution failed", { id: toastId });
+    }
   };
 
   return (
@@ -176,7 +183,10 @@ export default function SplitDetails() {
                 <div className={styles.distributeBtn}>
                   {Number(split?.confirmedCount) ===
                     Number(split?.recipients.length) && (
-                    <Button variant="primary" onClick={handleDistribute}>
+                    <Button
+                      variant="primary"
+                      onClick={() => handleDistribute(split?.id)}
+                    >
                       Distribute Split
                     </Button>
                   )}

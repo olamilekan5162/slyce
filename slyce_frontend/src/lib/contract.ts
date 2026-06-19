@@ -189,11 +189,12 @@ export function buildDepositToVaultTx(
 export function buildDistributeVaultTx(
   splitId: string,
   packageId: string,
+  protocolConfigId: string,
 ): Transaction {
   const tx = new Transaction();
   tx.moveCall({
     target: `${packageId}::slyce::distribute_vault`,
-    arguments: [tx.object(getProtocolConfigId()), tx.object(splitId)],
+    arguments: [tx.object(protocolConfigId), tx.object(splitId)],
   });
 
   return tx;
