@@ -9,7 +9,11 @@ import { useNavigate } from "react-router-dom";
 import { useCurrentAccount, useCurrentClient } from "@mysten/dapp-kit-react";
 import { useBalances } from "../../hooks/useBalances";
 import { useFetchSplits } from "../../hooks/useFetchSplits";
-import { formatAddress, fetchUserActivity } from "../../lib/helpers";
+import {
+  formatAddress,
+  fetchUserActivity,
+  getDistType,
+} from "../../lib/helpers";
 import type { Activity } from "../../types";
 
 const Dashboard = () => {
@@ -35,25 +39,10 @@ const Dashboard = () => {
     }
   }, [client, currentAccount?.address]);
 
-  const getDistType = (type: number) => {
-    switch (type) {
-      case 0:
-        return "Manual";
-      case 1:
-        return "Threshold";
-      case 2:
-        return "Scheduled";
-      case 3:
-        return "Automated";
-      default:
-        return "Unknown";
-    }
-  };
-
   const share = lastSplit?.recipients.find((recipient) =>
     recipient?.contact
       ?.toLocaleLowerCase()
-      .includes(currentAccount?.address?.toLocaleLowerCase() || "")
+      .includes(currentAccount?.address?.toLocaleLowerCase() || ""),
   );
 
   return (

@@ -10,6 +10,7 @@ import { useFetchSplitById } from "../../hooks/useFetchSplitById";
 import { formatAddress } from "@mysten/sui/utils";
 import toast from "react-hot-toast";
 import LoadingState from "../../components/loadingState/LoadingState";
+import { getDistType } from "../../lib/helpers";
 
 export default function SplitDetails() {
   const { id } = useParams();
@@ -24,6 +25,10 @@ export default function SplitDetails() {
   const handleCopyAddress = () => {
     navigator.clipboard.writeText(split?.id || "");
     toast.success("Split address copied to clipboard!");
+  };
+
+  const handleDistribute = () => {
+    console.log("distribute");
   };
 
   return (
@@ -119,10 +124,18 @@ export default function SplitDetails() {
                 </span>
               </div>
 
-              <p className={styles.configDescription}>
-                Waiting for all participants to confirm the current split ratios
-                before activating.
-              </p>
+              {Number(split?.confirmedCount) !==
+              Number(split?.recipients.length) ? (
+                <p className={styles.configDescription}>
+                  Waiting for all participants to confirm the current split
+                  ratios before activating.
+                </p>
+              ) : (
+                <p className={styles.configDescription}>
+                  All participants have confirmed the current split ratios. You
+                  can now distribute the payment.
+                </p>
+              )}
 
               <div className={styles.progressTrack}>
                 <div
@@ -157,8 +170,16 @@ export default function SplitDetails() {
                 <div className={styles.specRow}>
                   <span className={styles.specLabel}>Distribution Engine</span>
                   <span className={styles.engineBadge}>
-                    {split?.distributionType}
+                    {getDistType(Number(split?.distributionType))}
                   </span>
+                </div>
+                <div className={styles.distributeBtn}>
+                  {Number(split?.confirmedCount) ===
+                    Number(split?.recipients.length) && (
+                    <Button variant="primary" onClick={handleDistribute}>
+                      Distribute Split
+                    </Button>
+                  )}
                 </div>
 
                 {/* <div className={styles.specRow}>

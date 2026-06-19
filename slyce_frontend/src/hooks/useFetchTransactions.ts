@@ -12,7 +12,7 @@ import { fetchBalanceInDollars } from "../lib/helpers";
 
 async function fetchTransactions(
   address: string,
-  client: ClientWithCoreApi
+  client: ClientWithCoreApi,
 ): Promise<Split[]> {
   const packageId = getPackageId();
   const result = await graphqlClient.query({
@@ -32,6 +32,8 @@ async function fetchTransactions(
   });
 
   console.log("GraphQL result:", result);
+
+  // @ts-expect-error: 'data' is unknown but we know it contains 'nodes' at runtime
 
   const nodes = result.data?.events?.nodes ?? [];
 
@@ -64,28 +66,28 @@ async function fetchTransactions(
     };
   });
 
-  const splits = await Promise.all(
+  const transactions = await Promise.all(
     rawSplits.map(async ({ totalUsdPromise, ...split }) => {
       const result = await totalUsdPromise.catch(() => ({ totalUsd: 0 }));
       return {
         ...split,
         totalUsd: result?.totalUsd ?? 0,
       };
-    })
+    }),
   );
 
-  return splits;
+  return transactions;
 }
 
 export function useFetchTransactions() {
   const currentAccount = useCurrentAccount();
   const client = useCurrentClient();
 
-  const [splits, setSplits] = useState<Split[]>([]);
+  const [transactions, setTransactions] = useState<Split[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSplits = useCallback(async () => {
+  const fetchTrasacts = useCallback(async () => {
     if (!currentAccount?.address) return;
     const address = currentAccount.address;
 
@@ -97,7 +99,7 @@ export function useFetchTransactions() {
 
       result = await fetchTransactions(address, client);
 
-      setSplits(result);
+      setTransactions(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load splits.");
     } finally {
@@ -108,10 +110,10 @@ export function useFetchTransactions() {
   useEffect(() => {
     if (!currentAccount?.address) return;
     const fetchData = async () => {
-      await fetchSplits();
+      await fetchTrasacts();
     };
     fetchData();
-  }, [currentAccount, isUserSplits, fetchSplits]);
+  }, [currentAccount, fetchTrasacts]);
 
-  return { splits, loading, error, refetch: fetchSplits };
+  return { transactions, loading, error, refetch: fetchTrasacts };
 }

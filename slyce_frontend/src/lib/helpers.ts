@@ -25,20 +25,20 @@ export const decodeBytes = (bytes: number[]): string => {
 };
 
 export const getTokenPrice = async (
-  coinType: string
+  coinType: string,
 ): Promise<{ price: number; change24h: number | null }> => {
   try {
     const res = await fetch(
       `https://api.dexscreener.com/latest/dex/tokens/${encodeURIComponent(
-        coinType
-      )}`
+        coinType,
+      )}`,
     );
     const { pairs } = await res.json();
 
     const suiPairs = (pairs ?? [])
       .filter((p: any) => p.chainId === "sui")
       .sort(
-        (a: any, b: any) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0)
+        (a: any, b: any) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0),
       );
 
     const best = suiPairs[0];
@@ -53,7 +53,7 @@ export const getTokenPrice = async (
 
 export const getCoinsMetadata = async (
   coinType: string,
-  client: SuiGrpcClient
+  client: SuiGrpcClient,
 ): Promise<{
   symbol: string;
   name: string;
@@ -92,7 +92,7 @@ export const DISTRIBUTION_TYPE_LABEL: Record<number, string> = {
 export const formatBalance = (
   balance: string | number,
   decimals: number,
-  symbol: string
+  symbol: string,
 ): string => {
   const value = Number(balance) / Math.pow(10, decimals);
   return `${value.toLocaleString("en-US", {
@@ -111,7 +111,7 @@ export const formatShare = (bps: number): string => {
 
 export const fetchBalanceInDollars = async (
   client: ClientWithCoreApi,
-  address: string
+  address: string,
 ) => {
   try {
     const { balances } = await client.core.listBalances({
@@ -129,7 +129,7 @@ export const fetchBalanceInDollars = async (
       const formattedBalance = Number(balance.balance) / Math.pow(10, decimals);
 
       const { price: priceUsd, change24h } = await getTokenPrice(
-        balance.coinType
+        balance.coinType,
       );
       const usdValue = formattedBalance * priceUsd;
 
@@ -163,13 +163,13 @@ export const fetchBalanceInDollars = async (
 
 export const fetchUserActivity = async (
   address: string,
-  limit: number = 10
+  limit: number = 10,
 ) => {
   console.log(
     "Fetching user activity for address:",
     address,
     "with limit:",
-    limit
+    limit,
   );
   if (!address) return [];
 
@@ -217,6 +217,7 @@ export const fetchUserActivity = async (
 
     console.log("GraphQL transaction query result:", result);
 
+    // @ts-expect-error: 'data' is unknown but we know it contains 'nodes' at runtime
     const nodes = result?.data?.transactions?.nodes ?? [];
 
     return nodes.map((tx: any) => {
@@ -228,7 +229,7 @@ export const fetchUserActivity = async (
 
       // Find the balance change that belongs to this user
       const userChange = balanceChanges.find(
-        (bc: any) => bc.owner?.address === address
+        (bc: any) => bc.owner?.address === address,
       );
 
       if (userChange) {
@@ -273,6 +274,21 @@ export const fetchUserActivity = async (
   } catch (err) {
     console.error("Error fetching activity:", err);
     return [];
+  }
+};
+
+export const getDistType = (type: number) => {
+  switch (type) {
+    case 0:
+      return "Manual";
+    case 1:
+      return "Threshold";
+    case 2:
+      return "Scheduled";
+    case 3:
+      return "Automated";
+    default:
+      return "Unknown";
   }
 };
 

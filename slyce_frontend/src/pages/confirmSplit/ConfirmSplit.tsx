@@ -1,11 +1,13 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Button from "../../components/button/Button";
 import LoginModal from "../../components/loginModal/LoginModal";
 import styles from "./ConfirmSplit.module.css";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { useFetchSplitById } from "../../hooks/useFetchSplitById";
 import { useSplits } from "../../hooks/useSplits";
+import { formatAddress } from "../../lib/helpers";
+import LoadingState from "../../components/loadingState/LoadingState";
 import toast from "react-hot-toast";
 
 const PASSCODE_LENGTH = 6;
@@ -13,74 +15,55 @@ const PASSCODE_LENGTH = 6;
 export default function ConfirmSplit() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
-  const urlCode = searchParams.get("code");
-  const navigate = useNavigate();
-
-  const currentAccount = useCurrentAccount();
-  const { split, loading: splitLoading } = useFetchSplitById(id || "");
-  const { confirmSplit } = useSplits();
+  const urlCode = searchParams.get("code") ?? "";
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [passcode, setPasscode] = useState<string[]>(
     Array(PASSCODE_LENGTH).fill(""),
   );
-  const [isConfirming, setIsConfirming] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Pre-fill passcode if provided in URL
+  const currentAccount = useCurrentAccount();
+  const isConnected = !!currentAccount;
+
+  const { split, loading } = useFetchSplitById(id ?? "");
+  const { confirmSplit } = useSplits();
+
+  // Auto-fill passcode from URL param on mount
   useEffect(() => {
     if (urlCode && urlCode.length === PASSCODE_LENGTH) {
-      setPasscode(urlCode.split(""));
+      setPasscode(urlCode.toUpperCase().split(""));
     }
   }, [urlCode]);
 
-  const { total, confirmed, collaborators, yourShare, recipientIndex } = useMemo(() => {
-    if (!split) {
-      return { total: 0, confirmed: 0, collaborators: [], yourShare: 0, recipientIndex: -1 };
-    }
+  // Find the recipient index for the connected wallet
+  const recipientIndex = (() => {
+    if (!split || !currentAccount) return -1;
+    // First try: match by confirmed_address or contact field
+    const idx = split.recipients.findIndex(
+      (r: any) =>
+        r.confirmed_address?.toLowerCase() ===
+          currentAccount.address.toLowerCase() ||
+        r.contact?.toLowerCase() === currentAccount.address.toLowerCase(),
+    );
+    return idx;
+  })();
 
-    let userShare = 0;
-    let rIndex = -1;
-    const collabs = split.recipients.map((r: any, index: number) => {
-      const isYou = r.contact === currentAccount?.address;
-      if (isYou) {
-        userShare = Number(r.share) / 100; // Convert basis points to % if stored as 1500 -> 15%
-        rIndex = index;
-      }
-      return {
-        id: index.toString(),
-        name: isYou ? "You" : r.contact.slice(0, 6) + "..." + r.contact.slice(-4),
-        address: r.contact,
-        avatar: isYou ? "U" : r.contact.slice(2, 4).toUpperCase(),
-        share: Number(r.share) / 100,
-        status: r.has_confirmed ? "Confirmed" : "Pending",
-        avatarClass: isYou ? styles.avatarPurple : styles.avatarGrey,
-      };
-    });
+  // The recipient we're confirming for
+  const myRecipient =
+    recipientIndex >= 0 ? split?.recipients[recipientIndex] : null;
 
-    const confCount = collabs.filter((c) => c.status === "Confirmed").length;
-    
-    // Check if user is already confirmed
-    if (rIndex !== -1 && collabs[rIndex].status === "Confirmed") {
-      setIsConfirmed(true);
-    }
-
-    return {
-      total: collabs.length,
-      confirmed: confCount,
-      collaborators: collabs,
-      yourShare: userShare,
-      recipientIndex: rIndex,
-    };
-  }, [split, currentAccount]);
-
-  const progress = total > 0 ? confirmed / total : 0;
-  const isConnected = !!currentAccount;
+  const myShare = myRecipient
+    ? (Number((myRecipient as any).share) / 100).toFixed(0)
+    : "0";
+  const confirmedCount = Number(split?.confirmedCount ?? 0);
+  const totalCount = split?.recipients.length ?? 0;
+  const progress = totalCount > 0 ? confirmedCount / totalCount : 0;
 
   const handlePasscodeChange = (index: number, value: string) => {
     if (value.length > 1) {
-      const chars = value.slice(0, PASSCODE_LENGTH).split("");
+      const chars = value.toUpperCase().slice(0, PASSCODE_LENGTH).split("");
       setPasscode((prev) => {
         const next = [...prev];
         chars.forEach((char, i) => {
@@ -92,7 +75,6 @@ export default function ConfirmSplit() {
       inputRefs.current[targetIndex]?.focus();
       return;
     }
-    if (value && !/^[A-Za-z0-9]*$/.test(value)) return;
     setPasscode((prev) => {
       const next = [...prev];
       next[index] = value.toUpperCase();
@@ -115,7 +97,10 @@ export default function ConfirmSplit() {
   const handlePaste = useCallback(
     (e: React.ClipboardEvent<HTMLInputElement>) => {
       e.preventDefault();
-      const pasted = e.clipboardData.getData("text").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+      const pasted = e.clipboardData
+        .getData("text")
+        .replace(/\s/g, "")
+        .toUpperCase();
       const chars = pasted.slice(0, PASSCODE_LENGTH).split("");
       setPasscode((prev) => {
         const next = [...prev];
@@ -133,45 +118,27 @@ export default function ConfirmSplit() {
   const handleConfirm = async () => {
     const code = passcode.join("");
     if (code.length !== PASSCODE_LENGTH) return;
-    if (recipientIndex === -1) {
-      toast.error("Your connected wallet is not a recipient of this split.");
+    if (!id || recipientIndex < 0) {
+      toast.error("Could not find your recipient slot in this split.");
       return;
     }
-    
-    setIsConfirming(true);
+
     const toastId = toast.loading("Confirming your participation...");
-    
     try {
-      const passcodeArray = Array.from(new TextEncoder().encode(code));
-      await confirmSplit(split.id, recipientIndex, passcodeArray);
-      toast.success("Successfully confirmed split!", { id: toastId });
+      // Convert the raw passcode string to bytes (number[]) — the contract hashes it internally
+      const encoder = new TextEncoder();
+      const passcodeBytes = Array.from(encoder.encode(code));
+
+      await confirmSplit(id, recipientIndex, passcodeBytes);
+      toast.success("Split confirmed successfully!", { id: toastId });
       setIsConfirmed(true);
     } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Failed to confirm split.", { id: toastId });
-    } finally {
-      setIsConfirming(false);
+      toast.error(err.message ?? "Confirmation failed", { id: toastId });
     }
   };
 
   const fullPasscode = passcode.join("");
   const isPasscodeComplete = fullPasscode.length === PASSCODE_LENGTH;
-
-  if (splitLoading) {
-    return (
-      <div className={styles.page}>
-        <p>Loading split details...</p>
-      </div>
-    );
-  }
-
-  if (!split) {
-    return (
-      <div className={styles.page}>
-        <p>Split not found.</p>
-      </div>
-    );
-  }
 
   if (isConfirmed) {
     return (
@@ -195,18 +162,9 @@ export default function ConfirmSplit() {
             </div>
             <h2 className={styles.successTitle}>Split Confirmed!</h2>
             <p className={styles.successDesc}>
-              You've confirmed your {yourShare}% share in{" "}
-              <strong>{split.name}</strong>.
+              You've confirmed your {myShare}% share in{" "}
+              <strong>{split?.name}</strong>.
             </p>
-            <Button
-              variant="primary"
-              size="lg"
-              className={styles.actionBtn}
-              onClick={() => navigate(`/app/splits/${split.id}`)}
-              style={{ marginTop: 24 }}
-            >
-              View Split Dashboard
-            </Button>
           </div>
         </div>
       </div>
@@ -221,128 +179,160 @@ export default function ConfirmSplit() {
           <span className={styles.brandName}>Slyce</span>
         </div>
 
-        {/* Invite content */}
-        <div className={styles.inviteBody}>
-          <div className={styles.inviteText}>
-            <h1 className={styles.inviteHeading}>
-              You've been added to a split
-            </h1>
+        {loading ? (
+          <LoadingState message="Loading split details..." />
+        ) : !split ? (
+          <div className={styles.inviteBody}>
             <p className={styles.inviteSubtext}>
-              Review the details below and confirm your participation.
+              This split could not be found or has been cancelled.
             </p>
           </div>
+        ) : (
+          <>
+            {/* Invite content */}
+            <div className={styles.inviteBody}>
+              <div className={styles.inviteText}>
+                <h1 className={styles.inviteHeading}>
+                  You've been added to a split
+                </h1>
+                <p className={styles.inviteSubtext}>
+                  Review the details below and confirm your participation.
+                </p>
+              </div>
 
-          {/* Your share — big visual */}
-          <div className={styles.shareSection}>
-            <span className={styles.shareLabel}>Your share</span>
-            <div className={styles.shareCircle}>
-              <span className={styles.sharePercent}>{yourShare}%</span>
-            </div>
-            <span className={styles.shareTitle}>{split.name}</span>
-          </div>
-
-          <div className={styles.divider} />
-
-          {/* Participants */}
-          <div className={styles.participantsSection}>
-            <span className={styles.sectionTitle}>Participants</span>
-            <div className={styles.participantRows}>
-              {collaborators.map((c: any) => (
-                <div key={c.id} className={styles.participantRow}>
-                  <div className={styles.participantLeft}>
-                    <div className={`${styles.avatar} ${c.avatarClass}`}>
-                      {c.avatar}
-                    </div>
-                    <div className={styles.participantInfo}>
-                      <span className={styles.participantName}>{c.name}</span>
-                      <span className={styles.participantAddress}>
-                        {c.address}
-                      </span>
-                    </div>
-                  </div>
-                  <div className={styles.participantMeta}>
-                    <span className={styles.participantShare}>{c.share}%</span>
-                    <span
-                      className={`${styles.statusBadge} ${
-                        c.status === "Confirmed"
-                          ? styles.statusConfirmed
-                          : styles.statusPending
-                      }`}
-                    >
-                      {c.status}
-                    </span>
-                  </div>
+              {/* Your share — big visual */}
+              <div className={styles.shareSection}>
+                <span className={styles.shareLabel}>Your share</span>
+                <div className={styles.shareCircle}>
+                  <span className={styles.sharePercent}>{myShare}%</span>
                 </div>
-              ))}
+                <span className={styles.shareTitle}>{split.name}</span>
+              </div>
+
+              <div className={styles.divider} />
+
+              {/* Participants */}
+              <div className={styles.participantsSection}>
+                <span className={styles.sectionTitle}>Participants</span>
+                <div className={styles.participantRows}>
+                  {split.recipients.map((r: any, i: number) => {
+                    const isMe =
+                      r.confirmed_address?.toLowerCase() ===
+                        currentAccount?.address?.toLowerCase() ||
+                      r.contact?.toLowerCase() ===
+                        currentAccount?.address?.toLowerCase();
+                    return (
+                      <div key={i} className={styles.participantRow}>
+                        <div className={styles.participantLeft}>
+                          <div
+                            className={`${styles.avatar} ${isMe ? styles.avatarDark : styles.avatarGrey}`}
+                          >
+                            {(r.contact ?? "?").slice(2, 4).toUpperCase()}
+                          </div>
+                          <div className={styles.participantInfo}>
+                            <span className={styles.participantName}>
+                              {formatAddress(r.contact)}
+                              {isMe ? " (You)" : ""}
+                            </span>
+                            <span className={styles.participantAddress}>
+                              {formatAddress(r.confirmed_address || r.contact)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className={styles.participantMeta}>
+                          <span className={styles.participantShare}>
+                            {(Number(r.share) / 100).toFixed(0)}%
+                          </span>
+                          <span
+                            className={`${styles.statusBadge} ${
+                              r.confirmed
+                                ? styles.statusConfirmed
+                                : styles.statusPending
+                            }`}
+                          >
+                            {r.confirmed ? "Confirmed" : "Pending"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className={styles.progressRow}>
+                  <div className={styles.progressTrack}>
+                    <div
+                      className={styles.progressFill}
+                      style={{ width: `${progress * 100}%` }}
+                    />
+                  </div>
+                  <span className={styles.progressCount}>
+                    {confirmedCount}/{totalCount} confirmed
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className={styles.progressRow}>
-              <div className={styles.progressTrack}>
-                <div
-                  className={styles.progressFill}
-                  style={{ width: `${progress * 100}%` }}
-                />
-              </div>
-              <span className={styles.progressCount}>
-                {confirmed}/{total} confirmed
-              </span>
+            {/* Action area */}
+            <div className={styles.actionSection}>
+              {!isConnected ? (
+                <div className={styles.connectBlock}>
+                  <p className={styles.connectDesc}>
+                    Connect your wallet to confirm your participation.
+                  </p>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className={styles.actionBtn}
+                    onClick={() => setIsLoginOpen(true)}
+                  >
+                    Connect Wallet
+                  </Button>
+                </div>
+              ) : myRecipient && (myRecipient as any).confirmed ? (
+                <div className={styles.connectBlock}>
+                  <p className={styles.connectDesc}>
+                    You have already confirmed your participation in this split.
+                  </p>
+                </div>
+              ) : (
+                <div className={styles.passcodeBlock}>
+                  <label className={styles.passcodeLabel}>Enter Passcode</label>
+                  <div className={styles.otpRow}>
+                    {Array.from({ length: PASSCODE_LENGTH }).map((_, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => {
+                          inputRefs.current[index] = el;
+                        }}
+                        type="text"
+                        inputMode="text"
+                        maxLength={index === 0 ? PASSCODE_LENGTH : 1}
+                        value={passcode[index]}
+                        onChange={(e) =>
+                          handlePasscodeChange(index, e.target.value)
+                        }
+                        onKeyDown={(e) => handleKeyDown(index, e)}
+                        onPaste={index === 0 ? handlePaste : undefined}
+                        className={styles.otpInput}
+                        autoFocus={index === 0}
+                        aria-label={`Passcode character ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className={styles.actionBtn}
+                    onClick={handleConfirm}
+                    disabled={!isPasscodeComplete}
+                  >
+                    Confirm Split
+                  </Button>
+                </div>
+              )}
             </div>
-          </div>
-        </div>
-
-        {/* Action area */}
-        <div className={styles.actionSection}>
-          {!isConnected ? (
-            <div className={styles.connectBlock}>
-              <p className={styles.connectDesc}>
-                Connect your wallet to confirm your participation.
-              </p>
-              <Button
-                variant="primary"
-                size="lg"
-                className={styles.actionBtn}
-                onClick={() => setIsLoginOpen(true)}
-              >
-                Connect Wallet
-              </Button>
-            </div>
-          ) : (
-            <div className={styles.passcodeBlock}>
-              <label className={styles.passcodeLabel}>Enter Passcode</label>
-              <div className={styles.otpRow}>
-                {Array.from({ length: PASSCODE_LENGTH }).map((_, index) => (
-                  <input
-                    key={index}
-                    ref={(el) => {
-                      inputRefs.current[index] = el;
-                    }}
-                    type="text"
-                    inputMode="text"
-                    maxLength={index === 0 ? PASSCODE_LENGTH : 1}
-                    value={passcode[index]}
-                    onChange={(e) =>
-                      handlePasscodeChange(index, e.target.value)
-                    }
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    onPaste={index === 0 ? handlePaste : undefined}
-                    className={styles.otpInput}
-                    autoFocus={index === 0 && !isPasscodeComplete}
-                    aria-label={`Passcode character ${index + 1}`}
-                  />
-                ))}
-              </div>
-              <Button
-                variant="primary"
-                size="lg"
-                className={styles.actionBtn}
-                onClick={handleConfirm}
-                disabled={!isPasscodeComplete || isConfirming || recipientIndex === -1}
-              >
-                {isConfirming ? "Confirming..." : "Confirm Split"}
-              </Button>
-            </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />

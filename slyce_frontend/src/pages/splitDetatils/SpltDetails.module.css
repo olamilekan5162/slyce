@@ -287,3 +287,8 @@
 .copyAddressBtn:hover {
   opacity: 0.8;
 }
+
+.distributeBtn {
+  display: flex;
+  justify-content: flex-end;
+}

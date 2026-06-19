@@ -12,7 +12,7 @@ import { fetchBalanceInDollars } from "../lib/helpers";
 
 async function fetchCreatedSplits(
   address: string,
-  client: ClientWithCoreApi
+  client: ClientWithCoreApi,
 ): Promise<Split[]> {
   const packageId = getPackageId();
   const result = await graphqlClient.query({
@@ -30,7 +30,7 @@ async function fetchCreatedSplits(
       type: `${packageId}::slyce::SplitCreatedEvent`,
     },
   });
-
+  // @ts-expect-error: 'data' is unknown but we know it contains 'nodes' at runtime
   const nodes = result.data?.events?.nodes ?? [];
 
   const ids = nodes
@@ -69,7 +69,7 @@ async function fetchCreatedSplits(
         ...split,
         totalUsd: result?.totalUsd ?? 0,
       };
-    })
+    }),
   );
 
   return splits;
@@ -77,7 +77,7 @@ async function fetchCreatedSplits(
 
 async function fetchJoinedSplits(
   address: string,
-  client: ClientWithCoreApi
+  client: ClientWithCoreApi,
 ): Promise<Split[]> {
   const packageId = getPackageId();
   const result = await graphqlClient.query({
@@ -96,6 +96,8 @@ async function fetchJoinedSplits(
     },
   });
 
+  // @ts-expect-error: 'data' is unknown but we know it contains 'nodes' at runtime
+
   const nodes = result.data?.events?.nodes ?? [];
 
   const ids = nodes
@@ -134,7 +136,7 @@ async function fetchJoinedSplits(
         ...split,
         totalUsd: result?.totalUsd ?? 0,
       };
-    })
+    }),
   );
 
   return splits;
