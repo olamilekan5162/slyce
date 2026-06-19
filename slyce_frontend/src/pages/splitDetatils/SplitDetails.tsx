@@ -80,7 +80,10 @@ export default function SplitDetails() {
 
               <div className={styles.collaboratorsList}>
                 {split?.recipients.map((c) => (
-                  <div key={c.address} className={styles.collaboratorRow}>
+                  <div
+                    key={c.confirmed_address}
+                    className={styles.collaboratorRow}
+                  >
                     <div className={styles.collabLeft}>
                       <div className={`${styles.avatarCircle}`}>
                         {c.contact?.slice(0, 2)}
@@ -90,7 +93,7 @@ export default function SplitDetails() {
                           {formatAddress(c.contact)}
                         </span>
                         <span className={styles.collabAddress}>
-                          {formatAddress(c.address || "")}
+                          {formatAddress(c.confirmed_address || "")}
                         </span>
                       </div>
                     </div>
@@ -185,7 +188,7 @@ export default function SplitDetails() {
                     Number(split?.recipients.length) && (
                     <Button
                       variant="primary"
-                      onClick={() => handleDistribute(split?.id)}
+                      onClick={() => handleDistribute(split?.id || "")}
                     >
                       Distribute Split
                     </Button>

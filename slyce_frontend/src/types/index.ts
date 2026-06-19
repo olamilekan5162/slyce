@@ -10,7 +10,7 @@ export type RecipientType = "address" | "email" | "contact";
 
 export interface SplitRecipient {
   contact: string;
-  address?: string;
+  confirmed_address?: string;
   share: number; // basis points (e.g. 5000 = 50%)
   confirmed: boolean;
   passcode_hash?: string;

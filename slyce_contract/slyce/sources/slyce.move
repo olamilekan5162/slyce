@@ -381,9 +381,20 @@ module slyce::slyce;
             j = j + 1;
         };
 
+        // Auto-confirm the creator (index 0)
+        let first_recipient = vector::borrow_mut(&mut recipients, 0);
+        first_recipient.confirmed = true;
+        first_recipient.confirmed_address = option::some(ctx.sender());
+
+        event::emit(RecipientConfirmedEvent {
+            split_id:           object::id(split),
+            recipient:          ctx.sender(),
+            confirmations_left: n - 1,
+        });
+
         split.name = name;
         split.recipients = recipients;
-        split.confirmed_count = 0;
+        split.confirmed_count = 1;
         split.distribution_type = distribution_type;
         split.threshold = threshold;
         split.interval = interval;
@@ -491,7 +502,7 @@ module slyce::slyce;
     }
 
     // ── Inbox Distribution (Receiving) ────────────────────────────────────────
-    public fun receive_and_distribute<T>(
+    public fun process_received_coin<T>(
         config:  &ProtocolConfig,
         split:   &mut Split,
         receipt: sui::transfer::Receiving<Coin<T>>,
@@ -500,8 +511,37 @@ module slyce::slyce;
         assert!(!split.is_cancelled, ESplitCancelled);
         assert!(split.is_locked, ENotLocked);
         let payment = sui::transfer::public_receive(&mut split.id, receipt);
-        assert!(payment.value() > 0, EZeroAmount);
-        internal_distribute(config, split, payment, ctx);
+        let amount = payment.value();
+        assert!(amount > 0, EZeroAmount);
+
+        let dist_type = split.distribution_type;
+        if (dist_type == 3) {
+            // Auto (Incoming) - Distribute immediately
+            internal_distribute(config, split, payment, ctx);
+        } else {
+            // Put it in the vault
+            let key = VaultKey<T> {};
+            if (dynamic_field::exists_with_type<VaultKey<T>, Balance<T>>(&split.id, key)) {
+                let vault = dynamic_field::borrow_mut<VaultKey<T>, Balance<T>>(&mut split.id, key);
+                vault.join(payment.into_balance());
+            } else {
+                dynamic_field::add(&mut split.id, key, payment.into_balance());
+            };
+            event::emit(FundsDepositedEvent { split_id: object::id(split), amount });
+
+            // If Threshold, check if we need to distribute
+            let mut should_distribute = false;
+            if (dist_type == 1) {
+                let vault_ref = dynamic_field::borrow<VaultKey<T>, Balance<T>>(&split.id, key);
+                if (vault_ref.value() >= split.threshold) {
+                    should_distribute = true;
+                }
+            };
+            
+            if (should_distribute) {
+                distribute_vault<T>(config, split, ctx);
+            }
+        }
     }
 
     // ── Internal ──────────────────────────────────────────────────────────────

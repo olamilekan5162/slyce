@@ -14,16 +14,6 @@ export function getProtocolConfigId(): string {
   return PROTOCOL_CONFIG_ID;
 }
 
-/**
- * Build a PTB for creating a new split.
- * Calls `slyce::slyce::create_split`.
- */
-/**
- * Build a PTB for creating a new split with passcode hashes.
- * @param data - split form data (name, recipients with contact/address/share)
- * @param passcodeHashes - pre-hashed passcodes for each recipient (empty for address/self)
- * @param packageId - deployed package ID
- */
 export function buildCreateSplitTx(
   data: SplitFormData,
   passcodeHashes: number[][],
@@ -112,10 +102,6 @@ export function buildUpdateSplitTx(
   return tx;
 }
 
-/**
- * Build a PTB for confirming a split.
- * Calls `slyce::slyce::confirm_split`.
- */
 export function buildConfirmSplitTx(
   splitId: string,
   recipientIndex: number,
@@ -136,10 +122,6 @@ export function buildConfirmSplitTx(
   return tx;
 }
 
-/**
- * Build a PTB for distributing a payment to a locked split.
- * Calls `slyce::slyce::split_payment`.
- */
 export function buildDistributeTx(
   splitId: string,
   coinType: string,
@@ -161,10 +143,6 @@ export function buildDistributeTx(
   return tx;
 }
 
-/**
- * Build a PTB for depositing to a split's vault.
- * Calls `slyce::slyce::deposit_to_vault`.
- */
 export function buildDepositToVaultTx(
   splitId: string,
   coinType: string,
@@ -182,10 +160,6 @@ export function buildDepositToVaultTx(
   return tx;
 }
 
-/**
- * Build a PTB for distributing from a split's vault.
- * Calls `slyce::slyce::distribute_vault`.
- */
 export function buildDistributeVaultTx(
   splitId: string,
   packageId: string,
