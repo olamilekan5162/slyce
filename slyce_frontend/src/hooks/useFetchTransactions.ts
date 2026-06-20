@@ -1,119 +1,124 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Split } from "../types";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { useEffect, useRef, useState } from "react";
 import { graphqlClient } from "../lib/suiClient";
 import { getPackageId } from "../lib/contract";
-import {
-  useCurrentAccount,
-  useCurrentClient,
-  type ClientWithCoreApi,
-} from "@mysten/dapp-kit-react";
-import { useCallback, useEffect, useState } from "react";
-import { fetchBalanceInDollars } from "../lib/helpers";
+import type { Activity } from "../types";
 
-async function fetchTransactions(
-  address: string,
-  client: ClientWithCoreApi,
-): Promise<Split[]> {
-  const packageId = getPackageId();
-  const result = await graphqlClient.query({
-    query: `
-      query GetTransactions($type: String) {
-        events(filter: { type: $type }, first: 50) {
-          nodes {
-            sender { address }
-            contents { json }
-          }
-        }
-      }
-    `,
-    variables: {
-      type: `${packageId}::slyce::PaymentDistributedEvent`,
-    },
-  });
+const SUI_DECIMALS = 9;
 
-  console.log("GraphQL result:", result);
+function formatAmount(amount: string, coinType: string): string {
+  const num = Number(amount);
+  // Default to SUI decimals (9) for SUI coin, otherwise show raw
+  const isSui = coinType === "0x2::sui::SUI" || coinType.endsWith("::sui::SUI");
+  const decimals = isSui ? SUI_DECIMALS : 0;
+  const formatted = num / Math.pow(10, decimals);
 
-  // @ts-expect-error: 'data' is unknown but we know it contains 'nodes' at runtime
+  // Extract symbol from coin type
+  const parts = coinType.split("::");
+  const symbol = parts[parts.length - 1]?.toUpperCase() || "TOKEN";
 
-  const nodes = result.data?.events?.nodes ?? [];
-
-  const ids = nodes
-    .filter((n: any) => n.sender?.address === address)
-    .map((n: any) => n.contents?.json?.split_id)
-    .filter(Boolean) as string[];
-
-  if (ids.length === 0) return [];
-
-  const { objects } = await client.core.getObjects({
-    objectIds: ids,
-    include: { content: true, json: true },
-  });
-
-  const rawSplits = objects.map((obj: any) => {
-    const splitData = obj.json;
-    return {
-      id: splitData.id,
-      name: splitData.name,
-      creator: splitData.creator,
-      recipients: splitData.recipients,
-      isLocked: splitData.is_locked,
-      isCancelled: splitData.is_cancelled,
-      distributionType: splitData.distribution_type,
-      confirmedCount: splitData.confirmed_count,
-      threshold: splitData.threshold,
-      interval: splitData.interval,
-      totalUsdPromise: fetchBalanceInDollars(client, splitData.id),
-    };
-  });
-
-  const transactions = await Promise.all(
-    rawSplits.map(async ({ totalUsdPromise, ...split }) => {
-      const result = await totalUsdPromise.catch(() => ({ totalUsd: 0 }));
-      return {
-        ...split,
-        totalUsd: result?.totalUsd ?? 0,
-      };
-    }),
-  );
-
-  return transactions;
+  return `${formatted.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: decimals,
+  })} ${symbol}`;
 }
 
 export function useFetchTransactions() {
   const currentAccount = useCurrentAccount();
-  const client = useCurrentClient();
-
-  const [transactions, setTransactions] = useState<Split[]>([]);
+  const [transactions, setTransactions] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fetchingRef = useRef(false);
 
-  const fetchTrasacts = useCallback(async () => {
+  useEffect(() => {
     if (!currentAccount?.address) return;
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
     const address = currentAccount.address;
+    const packageId = getPackageId();
+    const eventType = `${packageId}::slyce::PaymentDistributedEvent`;
 
     setLoading(true);
     setError(null);
 
-    try {
-      let result: Split[];
+    graphqlClient
+      .query({
+        query: `
+          query GetUserPayments($type: String) {
+            events(filter: { type: $type }, first: 50) {
+              nodes {
+                sender { address }
+                timestamp
+                contents { json }
+              }
+            }
+          }
+        `,
+        variables: { type: eventType },
+      })
+      .then((result: any) => {
+        const nodes = result.data?.events?.nodes ?? [];
+        const activities: Activity[] = [];
 
-      result = await fetchTransactions(address, client);
+        for (const node of nodes) {
+          const json = node.contents?.json;
+          if (!json) continue;
 
-      setTransactions(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load splits.");
-    } finally {
-      setLoading(false);
-    }
-  }, [client, currentAccount]);
+          // Only include events where the current user is the recipient
+          if (json.recipient !== address) continue;
 
-  useEffect(() => {
-    if (!currentAccount?.address) return;
-    const fetchData = async () => {
-      await fetchTrasacts();
-    };
-    fetchData();
-  }, [currentAccount, fetchTrasacts]);
+          const splitId = json.split_id;
+          const amount = json.amount;
+          const coinType = json.coin_type;
 
-  return { transactions, loading, error, refetch: fetchTrasacts };
+          if (!splitId || !amount) continue;
+
+          const formattedSplitId = `${splitId.slice(0, 6)}...${splitId.slice(-4)}`;
+          const formattedAmount = formatAmount(amount, coinType || "");
+
+          const timestamp = node.timestamp;
+          const date = timestamp
+            ? new Date(timestamp).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : "";
+
+          const time = timestamp
+            ? new Date(timestamp).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+              })
+            : "";
+
+          activities.push({
+            id: splitId,
+            type: "receive",
+            title: formattedSplitId,
+            sender: splitId,
+            amount: formattedAmount,
+            date,
+            time,
+            status: "Completed",
+          });
+        }
+
+        setTransactions(activities);
+        setLoading(false);
+        fetchingRef.current = false;
+      })
+      .catch((err: any) => {
+        console.error("Error fetching transactions:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load transactions.",
+        );
+        setLoading(false);
+        fetchingRef.current = false;
+      });
+  }, [currentAccount?.address]);
+
+  return { transactions, loading, error };
 }

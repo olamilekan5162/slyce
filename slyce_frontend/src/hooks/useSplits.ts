@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
+import {
+  useCurrentAccount,
+  useCurrentClient,
+  useDAppKit,
+} from "@mysten/dapp-kit-react";
+import { Transaction } from "@mysten/sui/transactions";
 import {
   buildConfirmSplitTx,
   buildDistributeVaultTx,
@@ -188,13 +193,43 @@ export function useSplits() {
     return result.Transaction.digest;
   };
 
+  const client = useCurrentClient();
+
   const distributeVault = async (splitId: string): Promise<string> => {
     if (!currentAccount) throw new Error("Wallet not connected");
     const packageId = getPackageId();
     const protocolConfigId = getProtocolConfigId();
     if (!packageId) throw new Error("Contract not deployed");
 
-    const tx = buildDistributeVaultTx(splitId, packageId, protocolConfigId);
+    // Fetch coins owned by the split to know which vaults to distribute
+    const coinObjects = await client.core.listCoins({
+      owner: splitId,
+    });
+
+    console.log("Coins", coinObjects);
+
+    if (coinObjects.objects.length === 0) {
+      throw new Error("No funds found in this split to distribute");
+    }
+
+    // Get unique coin types from the split's coins
+    const coinTypes = [...new Set(coinObjects.objects.map((c: any) => c.type))];
+
+    const tx = new Transaction();
+
+    for (const coinType of coinTypes) {
+      // Extract inner type T from Coin<T>
+      const match = (coinType as string).match(/<([^>]+)>/);
+      const innerCoinType = match ? match[1] : coinType;
+
+      buildDistributeVaultTx(
+        tx,
+        innerCoinType as string,
+        splitId,
+        packageId,
+        protocolConfigId,
+      );
+    }
 
     const result = await dAppKit.signAndExecuteTransaction({
       transaction: tx,

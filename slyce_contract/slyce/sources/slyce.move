@@ -13,6 +13,7 @@ module slyce::slyce;
     use sui::dynamic_field;
     use sui::event;
     use std::ascii::String;
+    use std::type_name;
 
     // ── Errors ────────────────────────────────────────────────────────────────
     const EInvalidShares:     u64 = 0;
@@ -61,8 +62,10 @@ module slyce::slyce;
     }
 
     public struct PaymentDistributedEvent has copy, drop {
-        split_id: ID,
-        amount:   u64,
+        split_id:  ID,
+        amount:    u64,
+        recipient: address,
+        coin_type: String,
     }
 
     public struct FeeUpdatedEvent has copy, drop {
@@ -76,6 +79,12 @@ module slyce::slyce;
         split_id:      ID,
         num_recipients: u64,
         distribution_type: u8,
+    }
+
+    public struct WithdrawalEvent has copy, drop {
+        coin_type: String,
+        amount:    u64,
+        destination: address,
     }
 
     // ── Objects ───────────────────────────────────────────────────────────────
@@ -544,6 +553,26 @@ module slyce::slyce;
         }
     }
 
+    // ── Withdraw ──────────────────────────────────────────────────────────────
+    /// Withdraw a coin to a destination address.
+    /// This is a simple transfer — no fees, no split logic.
+    public fun withdraw<T>(
+        coin:        Coin<T>,
+        destination: address,
+        _ctx:        &mut TxContext,
+    ) {
+        let amount = coin.value();
+        assert!(amount > 0, EZeroAmount);
+
+        transfer::public_transfer(coin, destination);
+
+        event::emit(WithdrawalEvent {
+            coin_type:  type_name::with_defining_ids<T>().into_string(),
+            amount,
+            destination,
+        });
+    }
+
     // ── Internal ──────────────────────────────────────────────────────────────
     fun internal_distribute<T>(
         config:      &ProtocolConfig,
@@ -552,6 +581,7 @@ module slyce::slyce;
         ctx:         &mut TxContext,
     ) {
         let total = payment.value();
+        let coin_type = type_name::with_defining_ids<T>().into_string();
 
         // Protocol fee
         let fee = (total * config.fee_bps) / BPS_DENOMINATOR;
@@ -569,6 +599,12 @@ module slyce::slyce;
             if (amount > 0) {
                 let addr = *option::borrow(&recipient.confirmed_address);
                 transfer::public_transfer(payment.split(amount, ctx), addr);
+                event::emit(PaymentDistributedEvent {
+                    split_id: object::id(split),
+                    amount,
+                    recipient: addr,
+                    coin_type: copy coin_type,
+                });
             };
             i = i + 1;
         };
@@ -576,7 +612,13 @@ module slyce::slyce;
         // Last recipient absorbs any rounding dust — no value is ever trapped
         let last_recipient = vector::borrow(&split.recipients, n - 1);
         let last_addr = *option::borrow(&last_recipient.confirmed_address);
+        let last_amount = payment.value();
         transfer::public_transfer(payment, last_addr);
 
-        event::emit(PaymentDistributedEvent { split_id: object::id(split), amount: total });
+        event::emit(PaymentDistributedEvent {
+            split_id: object::id(split),
+            amount: last_amount,
+            recipient: last_addr,
+            coin_type,
+        });
     }

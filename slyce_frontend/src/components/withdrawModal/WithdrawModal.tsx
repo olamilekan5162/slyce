@@ -1,47 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "../modal/Modal";
 import Button from "../button/Button";
 import styles from "./WithdrawModal.module.css";
-import { tokens } from "../../lib/mockData";
+import { useBalances } from "../../hooks/useBalances";
+import { useWithdraw } from "../../hooks/useWithdraw";
+import toast from "react-hot-toast";
 
 interface WithdrawModalProps {
   isOpen: boolean;
+  address: string;
   onClose: () => void;
 }
 
 interface TokenWithdrawalState {
-  tokenId: number;
+  symbol: string;
   isSelected: boolean;
   amount: string;
 }
 
-export default function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
+export default function WithdrawModal({
+  isOpen,
+  address,
+  onClose,
+}: WithdrawModalProps) {
+  const { assets } = useBalances(address);
+  const { withdraw, pending } = useWithdraw();
   const [destinationAddress, setDestinationAddress] = useState("");
   const [withdrawAll, setWithdrawAll] = useState(false);
-  const [withdrawals, setWithdrawals] = useState<TokenWithdrawalState[]>(
-    tokens.map((token) => ({
-      tokenId: token.id,
-      isSelected: false,
-      amount: "",
-    }))
-  );
+  const [withdrawals, setWithdrawals] = useState<TokenWithdrawalState[]>([]);
 
-  const handleToggleTokenSelection = (tokenId: number) => {
+  useEffect(() => {
+    let cancelled = false;
+    const loadWithdrawals = () => {
+      if (cancelled) return;
+      setWithdrawals(
+        assets.map((asset) => ({
+          symbol: asset.symbol,
+          isSelected: false,
+          amount: "",
+        })),
+      );
+    };
+    loadWithdrawals();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [assets]);
+
+  const handleToggleTokenSelection = (symbol: string) => {
     if (withdrawAll) return;
     setWithdrawals(
       withdrawals.map((item) =>
-        item.tokenId === tokenId
+        item.symbol === symbol
           ? { ...item, isSelected: !item.isSelected, amount: "" }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
-  const handleAmountChange = (tokenId: number, val: string) => {
+  const handleAmountChange = (symbol: string, val: string) => {
     setWithdrawals(
       withdrawals.map((item) =>
-        item.tokenId === tokenId ? { ...item, amount: val } : item
-      )
+        item.symbol === symbol ? { ...item, amount: val } : item,
+      ),
     );
   };
 
@@ -51,42 +73,64 @@ export default function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
     if (nextWithdrawAll) {
       setWithdrawals(
         withdrawals.map((item) => {
-          const matchedToken = tokens.find((t) => t.id === item.tokenId);
+          const matchedAsset = assets.find((a) => a.symbol === item.symbol);
           return {
-            tokenId: item.tokenId,
+            symbol: item.symbol,
             isSelected: true,
-            amount: matchedToken ? matchedToken.amount.toString() : "",
+            amount: matchedAsset ? matchedAsset.balance.toString() : "",
           };
-        })
+        }),
       );
     } else {
       setWithdrawals(
         withdrawals.map((item) => ({
-          tokenId: item.tokenId,
+          symbol: item.symbol,
           isSelected: false,
           amount: "",
-        }))
+        })),
       );
     }
   };
 
-  const handleFormSubmit = (e: React.SyntheticEvent) => {
+  const handleFormSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     const activeWithdrawals = withdrawals.filter((w) => w.isSelected);
     if (activeWithdrawals.length === 0) {
-      alert("Please select at least one token to withdraw.");
+      toast.error("Please select at least one token to withdraw.");
       return;
     }
-    const details = activeWithdrawals.map((item) => {
-      const token = tokens.find((t) => t.id === item.tokenId);
-      return `${item.amount} ${token?.symbol}`;
-    });
-    alert(
-      `Withdrawal initiated!\nDestination: ${destinationAddress}\nAssets: ${details.join(
-        ", "
-      )}`
-    );
-    onClose();
+
+    try {
+      const batchWithdrawals = activeWithdrawals
+        .map((w) => {
+          const asset = assets.find((a) => a.symbol === w.symbol);
+          if (!asset) return null;
+
+          // Convert the amount to the smallest unit (using the coin's decimals)
+          const amountInSmallestUnit = w.amount
+            ? BigInt(
+                Math.floor(Number(w.amount) * Math.pow(10, asset.decimals)),
+              ).toString()
+            : "";
+
+          return { coinType: asset.coinType, amount: amountInSmallestUnit };
+        })
+        .filter(Boolean) as { coinType: string; amount: string }[];
+
+      if (batchWithdrawals.length === 0) return;
+
+      await withdraw(batchWithdrawals, destinationAddress);
+
+      toast.success("Withdrawal completed successfully!");
+      onClose();
+    } catch (err) {
+      console.error("Withdrawal failed:", err);
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Withdrawal failed. Please try again.",
+      );
+    }
   };
 
   return (
@@ -119,45 +163,45 @@ export default function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
         <div className={styles.tokensSection}>
           <span className={styles.label}>Select Assets</span>
           <div className={styles.tokensList}>
-            {tokens.map((token) => {
+            {assets.map((asset) => {
               const withdrawalState = withdrawals.find(
-                (w) => w.tokenId === token.id
+                (w) => w.symbol === asset.symbol,
               ) || { isSelected: false, amount: "" };
 
               return (
-                <div key={token.id} className={styles.tokenRow}>
+                <div key={asset.symbol} className={styles.tokenRow}>
                   <div className={styles.tokenRowLeft}>
                     <input
                       type="checkbox"
                       checked={withdrawalState.isSelected}
-                      onChange={() => handleToggleTokenSelection(token.id)}
+                      onChange={() => handleToggleTokenSelection(asset.symbol)}
                       disabled={withdrawAll}
                       className={styles.checkboxInput}
                     />
                     <div
                       className={`${styles.tokenIconWrapper} ${
-                        styles[token.symbol.toLowerCase()]
+                        styles[asset.symbol.toLowerCase()]
                       }`}
                     >
                       <img
-                        src={token.iconUrl}
-                        alt={token.symbol}
+                        src={asset.iconUrl}
+                        alt={asset.symbol}
                         className={styles.tokenIcon}
                       />
                     </div>
                     <div className={styles.tokenTextStack}>
-                      <span className={styles.tokenSymbol}>{token.symbol}</span>
-                      <span className={styles.tokenName}>{token.name}</span>
+                      <span className={styles.tokenSymbol}>{asset.symbol}</span>
+                      <span className={styles.tokenName}>{asset.name}</span>
                     </div>
                   </div>
 
                   <div className={styles.tokenRowRight}>
                     <div className={styles.balanceStack}>
                       <span className={styles.tokenAmount}>
-                        {token.amount} {token.symbol}
+                        {asset.balance} {asset.symbol}
                       </span>
                       <span className={styles.tokenValue}>
-                        ${token.fiatValue.toFixed(2)}
+                        {asset.usdValue}
                       </span>
                     </div>
 
@@ -167,7 +211,7 @@ export default function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
                       placeholder="0.00"
                       value={withdrawalState.amount}
                       onChange={(e) =>
-                        handleAmountChange(token.id, e.target.value)
+                        handleAmountChange(asset.symbol, e.target.value)
                       }
                       disabled={!withdrawalState.isSelected || withdrawAll}
                       className={styles.amountInput}
@@ -180,8 +224,13 @@ export default function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
           </div>
         </div>
 
-        <Button type="submit" variant="primary" className={styles.submitBtn}>
-          Confirm Withdrawal
+        <Button
+          type="submit"
+          variant="primary"
+          className={styles.submitBtn}
+          disabled={pending}
+        >
+          {pending ? "Processing..." : "Confirm Withdrawal"}
         </Button>
       </form>
     </Modal>

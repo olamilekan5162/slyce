@@ -4,7 +4,7 @@ import { TOKEN_ICONS } from "../lib/helpers";
 import { useCurrentClient } from "@mysten/dapp-kit-react";
 
 export function useTokens(address: string) {
-  const client = useCurrentClient()
+  const client = useCurrentClient();
   const [tokens, setTokens] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +29,7 @@ export function useTokens(address: string) {
           const metadata = meta.coinMetadata;
 
           userTokens.push({
+            coinType: balance.coinType,
             symbol: metadata?.symbol ?? "",
             name: metadata?.name ?? "",
             decimals: metadata?.decimals ?? 0,

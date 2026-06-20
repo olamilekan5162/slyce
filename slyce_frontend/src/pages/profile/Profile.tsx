@@ -116,6 +116,7 @@ const Profile = () => {
 
       <WithdrawModal
         isOpen={isWithdrawOpen}
+        address={currentAccount?.address || ""}
         onClose={() => setIsWithdrawOpen(false)}
       />
     </div>

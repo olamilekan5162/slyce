@@ -2,16 +2,21 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../card/Card";
 import styles from "./TransactionTable.module.css";
-import {
-  ChevronRight,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Activity as ActivityIcon,
-} from "lucide-react";
+import { ChevronRight, Activity as ActivityIcon } from "lucide-react";
 import Pagination from "../pagination/Pagination";
 import type { Activity } from "../../types";
 import LoadingState from "../loadingState/LoadingState";
 import EmptyState from "../emptyState/EmptyState";
+
+// Generate a blockie-style avatar URL from an address
+function getBlockieUrl(address: string): string {
+  console.log("Add", address);
+  console.log(
+    `https://api.dicebear.com/7x/identicon/svg?seed=${address}&backgroundColor=transparent`,
+  );
+
+  return `https://api.dicebear.com/7x/identicon/svg?seed=${address}&backgroundColor=transparent`;
+}
 
 const TransactionTable = ({
   activities,
@@ -29,7 +34,7 @@ const TransactionTable = ({
     ? activities
     : activities?.slice(
         (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
+        currentPage * itemsPerPage,
       );
 
   return (
@@ -78,7 +83,7 @@ const TransactionTable = ({
 
       {!isDashboard && (
         <div className={styles.tableHeader}>
-          <div>Type</div>
+          <div>Sender / Recipient</div>
           <div>Category</div>
           <div>Transaction Date</div>
           <div className={styles.headerAmount}>Amount</div>
@@ -95,59 +100,40 @@ const TransactionTable = ({
         />
       ) : (
         <div className={styles.transactionsList}>
-          {displayedActivities?.map((activity: Activity) => (
-            <div
-              key={activity?.id}
-              className={`${styles.transactionItem} ${
-                isDashboard ? styles.dashboardItem : ""
-              }`}
-            >
-              <div className={styles.txLeft}>
-                <div
-                  className={styles.txAvatar}
-                  style={{
-                    background: "#f3f4f6",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {activity?.type === "receive" ? (
-                    <ArrowDownLeft size={20} color="#2E7D6E" />
-                  ) : (
-                    <ArrowUpRight size={20} color="#E07A5F" />
-                  )}
-                </div>
+          {displayedActivities?.map((activity: Activity) => {
+            const avatarUrl = getBlockieUrl(
+              activity?.sender || activity?.title || "",
+            );
 
-                <div className={styles.txInfo}>
-                  <div className={styles.txName}>{activity?.title}</div>
-                </div>
-              </div>
-
-              {isDashboard ? (
-                <div className={styles.txRight}>
+            return (
+              <div
+                key={activity?.id}
+                className={`${styles.transactionItem} ${
+                  isDashboard ? styles.dashboardItem : ""
+                }`}
+              >
+                <div className={styles.txLeft}>
                   <div
-                    className={
-                      activity?.type === "receive"
-                        ? styles.txAmountPos
-                        : styles.txAmountNeg
-                    }
+                    className={styles.txAvatar}
+                    style={{
+                      background: "#f3f4f6",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                    }}
                   >
-                    {activity?.amount}
+                    <img src={avatarUrl} alt="avatar" width={24} height={24} />
                   </div>
-                  <div className={styles.txDate}>{activity?.time}</div>
-                </div>
-              ) : (
-                <>
-                  <div
-                    className={styles.txCategory}
-                    style={{ textTransform: "capitalize" }}
-                  >
-                    {activity?.type}
-                  </div>
-                  <div className={styles.txDate}>{activity?.date}</div>
 
-                  <div className={styles.txAmountWrapper}>
+                  <div className={styles.txInfo}>
+                    <div className={styles.txName}>{activity?.title}</div>
+                  </div>
+                </div>
+
+                {isDashboard ? (
+                  <div className={styles.txRight}>
                     <div
                       className={
                         activity?.type === "receive"
@@ -157,11 +143,34 @@ const TransactionTable = ({
                     >
                       {activity?.amount}
                     </div>
+                    <div className={styles.txDate}>{activity?.time}</div>
                   </div>
-                </>
-              )}
-            </div>
-          ))}
+                ) : (
+                  <>
+                    <div
+                      className={styles.txCategory}
+                      style={{ textTransform: "capitalize" }}
+                    >
+                      {activity?.type}
+                    </div>
+                    <div className={styles.txDate}>{activity?.date}</div>
+
+                    <div className={styles.txAmountWrapper}>
+                      <div
+                        className={
+                          activity?.type === "receive"
+                            ? styles.txAmountPos
+                            : styles.txAmountNeg
+                        }
+                      >
+                        {activity?.amount}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 

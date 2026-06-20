@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { ChevronRight, DollarSign, Plus } from "lucide-react";
 import Card from "../../components/card/Card";
 import Button from "../../components/button/Button";
@@ -6,43 +5,25 @@ import styles from "./Dashboard.module.css";
 import TransactionTable from "../../components/traansactionTable/TransactionTable";
 import TokensCard from "../../components/tokensCard/TokensCard";
 import { useNavigate } from "react-router-dom";
-import { useCurrentAccount, useCurrentClient } from "@mysten/dapp-kit-react";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { useBalances } from "../../hooks/useBalances";
 import { useFetchSplits } from "../../hooks/useFetchSplits";
-import {
-  formatAddress,
-  fetchUserActivity,
-  getDistType,
-} from "../../lib/helpers";
-import type { Activity } from "../../types";
+import { useFetchTransactions } from "../../hooks/useFetchTransactions";
+import { formatAddress, getDistType } from "../../lib/helpers";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const currentAccount = useCurrentAccount();
-  const client = useCurrentClient();
   const { totalBalance } = useBalances(currentAccount?.address);
   const { splits } = useFetchSplits(false);
+  const { transactions: activityList, loading: loadingActivities } =
+    useFetchTransactions();
   const lastSplit = splits?.at(-1);
-
-  const [activityList, setActivityList] = useState<Activity[]>([]);
-  const [loadingActivities, setLoadingActivities] = useState(true);
-
-  useEffect(() => {
-    if (currentAccount?.address) {
-      setLoadingActivities(true);
-      fetchUserActivity(currentAccount.address, 5).then((data: any) => {
-        setActivityList(data);
-        setLoadingActivities(false);
-      });
-    } else {
-      setLoadingActivities(false);
-    }
-  }, [client, currentAccount?.address]);
 
   const share = lastSplit?.recipients.find((recipient) =>
     recipient?.contact
       ?.toLocaleLowerCase()
-      .includes(currentAccount?.address?.toLocaleLowerCase() || ""),
+      .includes(currentAccount?.address?.toLocaleLowerCase() ?? ""),
   );
 
   return (
@@ -109,7 +90,7 @@ const Dashboard = () => {
                 <div className={`${styles.detailCol} ${styles.borderDark}`}>
                   <div className={styles.detailLabel}>Creator</div>
                   <div className={styles.detailValue}>
-                    {formatAddress(lastSplit?.creator) || 0x00}
+                    {formatAddress(lastSplit?.creator || "") || 0x00}
                   </div>
                 </div>
                 <div className={`${styles.detailCol} ${styles.borderBlue}`}>
@@ -121,7 +102,7 @@ const Dashboard = () => {
                 <div className={`${styles.detailCol} ${styles.borderGreen}`}>
                   <div className={styles.detailLabel}>Share</div>
                   <div className={styles.detailValue}>
-                    {share?.share / 100 || 0}%
+                    {(share?.share ?? 0) / 100 || 0}%
                   </div>
                 </div>
                 <div className={`${styles.detailCol} ${styles.borderOrange}`}>
@@ -129,7 +110,8 @@ const Dashboard = () => {
                   <div className={styles.detailValue}>
                     $
                     {(
-                      (lastSplit?.totalUsd || 0) * (share?.share / 10000 || 1)
+                      (lastSplit?.totalUsd || 0) *
+                      ((share?.share ?? 0) / 10000 || 1)
                     ).toFixed(2)}
                   </div>
                 </div>

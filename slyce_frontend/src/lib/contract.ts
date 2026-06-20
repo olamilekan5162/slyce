@@ -1,10 +1,11 @@
 import { Transaction } from "@mysten/sui/transactions";
+import type { TransactionObjectArgument } from "@mysten/sui/transactions";
 import type { SplitFormData } from "../types";
 
 const DEFAULT_PACKAGE_ID =
-  "0xc389c65936a6b8da4b673098b86ab23bd001c3ee67401d207ba847fe29bfa15c";
+  "0x93f7a109dcf93223a8c8a51c182fb5da4ab94f65ea0dea4aab0e909fac4f3288";
 const PROTOCOL_CONFIG_ID =
-  "0x27a5c2f24ef07fc81903f5b31cf460ffb3a650226e4cac61bfbd9694c224e1f3";
+  "0x650b81215e23271e7be8ec67fd7bb80f4ff1f36efedeb4fc7885db674c4ce8fc";
 
 export function getPackageId(): string {
   return import.meta.env.VITE_PACKAGE_ID || DEFAULT_PACKAGE_ID;
@@ -161,15 +162,29 @@ export function buildDepositToVaultTx(
 }
 
 export function buildDistributeVaultTx(
+  tx: Transaction,
+  coinType: string,
   splitId: string,
   packageId: string,
   protocolConfigId: string,
-): Transaction {
-  const tx = new Transaction();
+): void {
   tx.moveCall({
     target: `${packageId}::slyce::distribute_vault`,
+    typeArguments: [coinType],
     arguments: [tx.object(protocolConfigId), tx.object(splitId)],
   });
+}
 
-  return tx;
+export function buildWithdrawTx(
+  tx: Transaction,
+  coinType: string,
+  coin: TransactionObjectArgument,
+  destinationAddress: string,
+  packageId: string,
+): void {
+  tx.moveCall({
+    target: `${packageId}::slyce::withdraw`,
+    typeArguments: [coinType],
+    arguments: [coin, tx.pure.address(destinationAddress)],
+  });
 }

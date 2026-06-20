@@ -25,6 +25,7 @@ export function useBalances(address?: string) {
         });
 
         const userAssets: Asset[] = [];
+        console.log(balances);
 
         for (const balance of balances) {
           const meta = await client.core.getCoinMetadata({
@@ -32,6 +33,8 @@ export function useBalances(address?: string) {
           });
           const metadata = meta.coinMetadata;
           const decimals = metadata?.decimals ?? 0;
+          console.log("Bal:", balance);
+
           const formattedBalance =
             Number(balance.balance) / Math.pow(10, decimals);
 
@@ -41,6 +44,7 @@ export function useBalances(address?: string) {
           const usdValue = formattedBalance * priceUsd;
 
           userAssets.push({
+            coinType: balance.coinType,
             symbol: metadata?.symbol ?? "",
             name: metadata?.name ?? "",
             decimals,
@@ -57,6 +61,8 @@ export function useBalances(address?: string) {
             priceChangePercent: change24h,
           });
         }
+
+        console.log("User Asseta:", userAssets);
 
         if (cancelled) return;
 

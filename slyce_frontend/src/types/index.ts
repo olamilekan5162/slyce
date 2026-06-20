@@ -61,6 +61,7 @@ export interface AssetMetadata {
 }
 
 export interface Asset extends AssetMetadata {
+  coinType: string;
   balance: number;
   usdValue?: string;
   priceChangePercent?: number | null;
@@ -80,6 +81,7 @@ export interface Activity {
   id: string;
   type: ActivityType;
   title: string;
+  sender?: string;
   amount: string;
   date: string;
   time: string;
