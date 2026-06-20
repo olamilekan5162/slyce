@@ -136,6 +136,7 @@ export const fetchBalanceInDollars = async (
       const usdValue = formattedBalance * priceUsd;
 
       userAssets.push({
+        coinType: balance.coinType,
         symbol: metadata?.symbol ?? "",
         name: metadata?.name ?? "",
         decimals,

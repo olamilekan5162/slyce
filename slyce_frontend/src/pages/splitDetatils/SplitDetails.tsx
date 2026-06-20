@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Copy } from "lucide-react";
@@ -12,7 +13,6 @@ import toast from "react-hot-toast";
 import LoadingState from "../../components/loadingState/LoadingState";
 import { getDistType } from "../../lib/helpers";
 import { useSplits } from "../../hooks/useSplits";
-import { useSplitBalances } from "../../hooks/useSplitBalances";
 
 export default function SplitDetails() {
   const { id } = useParams();
@@ -20,7 +20,6 @@ export default function SplitDetails() {
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
   const { split, loading } = useFetchSplitById(id || "");
   const { distributeVault } = useSplits();
-  const { assets } = useSplitBalances(id || "");
 
   const progress =
     (split?.confirmedCount || 0) / (split?.recipients.length || 0);
