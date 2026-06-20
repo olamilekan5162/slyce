@@ -10,12 +10,7 @@ import EmptyState from "../emptyState/EmptyState";
 
 // Generate a blockie-style avatar URL from an address
 function getBlockieUrl(address: string): string {
-  console.log("Add", address);
-  console.log(
-    `https://api.dicebear.com/7x/identicon/svg?seed=${address}&backgroundColor=transparent`,
-  );
-
-  return `https://api.dicebear.com/7x/identicon/svg?seed=${address}&backgroundColor=transparent`;
+  return `https://api.dicebear.com/7.x/identicon/svg?seed=${address}&backgroundColor=transparent`;
 }
 
 const TransactionTable = ({
@@ -100,14 +95,14 @@ const TransactionTable = ({
         />
       ) : (
         <div className={styles.transactionsList}>
-          {displayedActivities?.map((activity: Activity) => {
+          {displayedActivities?.map((activity: Activity, i: number) => {
             const avatarUrl = getBlockieUrl(
               activity?.sender || activity?.title || "",
             );
 
             return (
               <div
-                key={activity?.id}
+                key={i}
                 className={`${styles.transactionItem} ${
                   isDashboard ? styles.dashboardItem : ""
                 }`}

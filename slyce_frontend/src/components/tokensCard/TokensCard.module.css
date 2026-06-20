@@ -99,6 +99,8 @@
   align-items: center;
   justify-content: center;
   padding: 4px;
+  background-color: #0f5c53;
+  overflow: hidden;
 }
 
 .tokenIcon {

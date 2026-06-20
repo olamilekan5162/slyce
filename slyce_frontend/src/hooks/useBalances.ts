@@ -25,7 +25,6 @@ export function useBalances(address?: string) {
         });
 
         const userAssets: Asset[] = [];
-        console.log(balances);
 
         for (const balance of balances) {
           const meta = await client.core.getCoinMetadata({
@@ -33,7 +32,6 @@ export function useBalances(address?: string) {
           });
           const metadata = meta.coinMetadata;
           const decimals = metadata?.decimals ?? 0;
-          console.log("Bal:", balance);
 
           const formattedBalance =
             Number(balance.balance) / Math.pow(10, decimals);
@@ -46,10 +44,14 @@ export function useBalances(address?: string) {
           userAssets.push({
             coinType: balance.coinType,
             symbol: metadata?.symbol ?? "",
-            name: metadata?.name ?? "",
+            name: metadata?.name || balance.coinType.split("::").pop() || "",
             decimals,
             iconUrl:
-              metadata?.iconUrl || TOKEN_ICONS[metadata?.symbol ?? ""] || "",
+              metadata?.iconUrl ||
+              TOKEN_ICONS[
+                metadata?.symbol || balance.coinType.split("::").pop() || ""
+              ] ||
+              "",
             balance: formattedBalance,
             usdValue:
               usdValue > 0
@@ -61,8 +63,6 @@ export function useBalances(address?: string) {
             priceChangePercent: change24h,
           });
         }
-
-        console.log("User Asseta:", userAssets);
 
         if (cancelled) return;
 

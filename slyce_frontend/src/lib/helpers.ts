@@ -6,6 +6,8 @@ import { graphqlClient } from "./suiClient";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const TOKEN_ICONS: Record<string, string> = {
   SUI: "https://s2.coinmarketcap.com/static/img/coins/64x64/20947.png",
+  ETH_FAUCET: "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+  USDT_FAUCET: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png",
 };
 
 export const hashPasscode = async (passcode: string): Promise<number[]> => {

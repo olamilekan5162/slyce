@@ -1,4 +1,5 @@
 import { useBalances } from "../../hooks/useBalances";
+import { useSplitBalances } from "../../hooks/useSplitBalances";
 import Card from "../card/Card";
 import LoadingState from "../loadingState/LoadingState";
 import styles from "./TokensCard.module.css";
@@ -6,14 +7,19 @@ import styles from "./TokensCard.module.css";
 interface TokensCardProps {
   address: string;
   className?: string;
+  isSplit?: boolean;
 }
 
 export default function TokensCard({
   address,
   className = "",
+  isSplit = false,
 }: TokensCardProps) {
-  const { assets, portfolioChange, totalBalance, loading } =
-    useBalances(address);
+  const userBalances = useBalances(isSplit ? address : address);
+  const splitBalances = useSplitBalances(isSplit ? address : "");
+
+  const activeBalances = isSplit ? splitBalances : userBalances;
+  const { assets, portfolioChange, totalBalance, loading } = activeBalances;
 
   return (
     <Card className={`${styles.rightColumn} ${className}`}>
@@ -26,7 +32,7 @@ export default function TokensCard({
               <>
                 <span className={styles.donutAmount}>${totalBalance}</span>
                 <span className={styles.donutChange}>
-                  +{portfolioChange?.amount.toFixed(2)}
+                  +{portfolioChange?.amount?.toFixed(2) || "0.00"}
                 </span>
               </>
             )}
@@ -39,14 +45,14 @@ export default function TokensCard({
       </div>
 
       <div className={styles.tokensList}>
-        {assets.map((asset) => (
-          <div key={asset.name} className={styles.tokenItem}>
+        {assets.map((asset, i) => (
+          <div key={i} className={styles.tokenItem}>
             <div className={styles.tokenLeft}>
               <div
                 className={`${styles.tokenIconWrapper} ${styles[asset.symbol.toLowerCase()] || ""}`}
               >
                 <img
-                  src={asset.iconUrl}
+                  src={asset.iconUrl || undefined}
                   alt={asset.symbol}
                   className={styles.tokenIcon}
                 />

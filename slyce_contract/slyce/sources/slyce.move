@@ -57,8 +57,9 @@ module slyce::slyce;
     }
 
     public struct FundsDepositedEvent has copy, drop {
-        split_id: ID,
-        amount:   u64,
+        split_id:  ID,
+        amount:    u64,
+        coin_type: String,
     }
 
     public struct PaymentDistributedEvent has copy, drop {
@@ -487,7 +488,8 @@ module slyce::slyce;
             dynamic_field::add(&mut split.id, key, payment.into_balance());
         };
 
-        event::emit(FundsDepositedEvent { split_id: object::id(split), amount });
+        let coin_type_deposit = type_name::with_defining_ids<T>().into_string();
+        event::emit(FundsDepositedEvent { split_id: object::id(split), amount, coin_type: coin_type_deposit });
     }
 
     // ── Vault Distribution ────────────────────────────────────────────────────
@@ -536,7 +538,8 @@ module slyce::slyce;
             } else {
                 dynamic_field::add(&mut split.id, key, payment.into_balance());
             };
-            event::emit(FundsDepositedEvent { split_id: object::id(split), amount });
+            let coin_type_deposit2 = type_name::with_defining_ids<T>().into_string();
+            event::emit(FundsDepositedEvent { split_id: object::id(split), amount, coin_type: coin_type_deposit2 });
 
             // If Threshold, check if we need to distribute
             let mut should_distribute = false;

@@ -292,3 +292,50 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* Vault Balances */
+.vaultList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.vaultRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.vaultLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vaultIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e6f4f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vaultSymbol {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.vaultRight {
+  text-align: right;
+}
+
+.vaultAmount {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}

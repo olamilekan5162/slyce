@@ -1,31 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { useCurrentAccount, useCurrentClient } from "@mysten/dapp-kit-react";
 import { useEffect, useRef, useState } from "react";
 import { graphqlClient } from "../lib/suiClient";
 import { getPackageId } from "../lib/contract";
 import type { Activity } from "../types";
 
-const SUI_DECIMALS = 9;
-
-function formatAmount(amount: string, coinType: string): string {
-  const num = Number(amount);
-  // Default to SUI decimals (9) for SUI coin, otherwise show raw
-  const isSui = coinType === "0x2::sui::SUI" || coinType.endsWith("::sui::SUI");
-  const decimals = isSui ? SUI_DECIMALS : 0;
-  const formatted = num / Math.pow(10, decimals);
-
-  // Extract symbol from coin type
-  const parts = coinType.split("::");
-  const symbol = parts[parts.length - 1]?.toUpperCase() || "TOKEN";
-
-  return `${formatted.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: decimals,
-  })} ${symbol}`;
-}
-
 export function useFetchTransactions() {
   const currentAccount = useCurrentAccount();
+  const client = useCurrentClient();
   const [transactions, setTransactions] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,12 +41,20 @@ export function useFetchTransactions() {
         `,
         variables: { type: eventType },
       })
-      .then((result: any) => {
+      .then(async (result: any) => {
         const nodes = result.data?.events?.nodes ?? [];
         const activities: Activity[] = [];
 
+        // Cache metadata to avoid redundant network requests for the same coinType
+        const metadataCache: Record<
+          string,
+          { decimals: number; symbol: string }
+        > = {};
+
         for (const node of nodes) {
           const json = node.contents?.json;
+          console.log(json);
+
           if (!json) continue;
 
           // Only include events where the current user is the recipient
@@ -71,12 +62,48 @@ export function useFetchTransactions() {
 
           const splitId = json.split_id;
           const amount = json.amount;
-          const coinType = json.coin_type;
+          let coinType = json.coin_type;
 
           if (!splitId || !amount) continue;
 
+          if (coinType && !coinType.startsWith("0x")) {
+            coinType = "0x" + coinType;
+          }
+
+          let decimals = 9;
+          let symbol = "TOKEN";
+
+          if (coinType) {
+            if (!metadataCache[coinType]) {
+              try {
+                const meta = await client.core.getCoinMetadata({ coinType });
+                metadataCache[coinType] = {
+                  decimals: meta?.coinMetadata?.decimals ?? 9,
+                  symbol:
+                    meta?.coinMetadata?.symbol ??
+                    coinType.split("::").pop()?.toUpperCase() ??
+                    "TOKEN",
+                };
+              } catch (e) {
+                // Fallback if metadata fails
+                metadataCache[coinType] = {
+                  decimals: coinType.endsWith("::sui::SUI") ? 9 : 0,
+                  symbol: coinType.split("::").pop()?.toUpperCase() || "TOKEN",
+                };
+              }
+            }
+            decimals = metadataCache[coinType].decimals;
+            symbol = metadataCache[coinType].symbol;
+          }
+
           const formattedSplitId = `${splitId.slice(0, 6)}...${splitId.slice(-4)}`;
-          const formattedAmount = formatAmount(amount, coinType || "");
+
+          const numAmount = Number(amount);
+          const formattedValue = numAmount / Math.pow(10, decimals);
+          const formattedAmount = `${formattedValue.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: Math.min(decimals, 4),
+          })} ${symbol}`;
 
           const timestamp = node.timestamp;
           const date = timestamp
@@ -118,7 +145,7 @@ export function useFetchTransactions() {
         setLoading(false);
         fetchingRef.current = false;
       });
-  }, [currentAccount?.address]);
+  }, [currentAccount?.address, client]);
 
   return { transactions, loading, error };
 }

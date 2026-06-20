@@ -95,51 +95,122 @@ async function syncNewSplits() {
 
 async function processPendingCoinsForSplit(splitId: string) {
   try {
-    // Check if the split object owns any coins
-    const coinsList = await grpcClient.listCoins({ owner: splitId });
-    console.log("Coins List", coinsList);
+    // Step 1: Check what coin types the split holds
+    const balanceResult = await graphqlClient.query({
+      query: `
+        query GetSplitBalances($owner: SuiAddress!) {
+          address(address: $owner) {
+            balances(first: 20) {
+              nodes {
+                coinType { repr }
+                totalBalance
+              }
+            }
+          }
+        }
+      `,
+      variables: { owner: splitId },
+    });
 
-    if (coinsList.objects.length === 0) return;
+    const balanceNodes =
+      (balanceResult.data as any)?.address?.balances?.nodes ?? [];
+    if (balanceNodes.length === 0) {
+      console.log(`[Process] No pending balances for Split ${splitId}`);
+      return;
+    }
 
-    console.log(
-      `[Process] Found ${coinsList.objects.length} pending coin(s) for Split ${splitId}`,
-    );
+    // Step 2: For each coin type, get the actual coin object IDs
+    for (const node of balanceNodes) {
+      const coinTypeRepr: string = node.coinType?.repr ?? "";
+      if (!coinTypeRepr) continue;
 
-    for (const coin of coinsList.objects) {
-      const coinId = coin.objectId;
-      const coinType = coin.type;
+      const innerType = coinTypeRepr; // already the full type e.g. 0x2::sui::SUI
 
-      // Extract inner type T from Coin<T>
-      const match = coinType.match(/<([^>]+)>/);
-      const innerCoinType = match ? match[1] : coinType;
-
-      console.log(
-        `[Process] Processing coin ${coinId} (Inner Type: ${innerCoinType}) for Split ${splitId}`,
-      );
-
-      const tx = new Transaction();
-      tx.moveCall({
-        target: `${PACKAGE_ID}::slyce::process_received_coin`,
-        typeArguments: [innerCoinType],
-        arguments: [
-          tx.object(PROTOCOL_CONFIG_ID),
-          tx.object(splitId),
-          tx.object(coinId), // Passing the Object ID works for Receiving<T> arguments
-        ],
+      const objectsResult = await graphqlClient.query({
+        query: `
+          query GetCoinObjects($owner: SuiAddress!, $type: String!) {
+            address(address: $owner) {
+              objects(first: 50, filter: { type: $type }) {
+                nodes {
+                  address
+                  version
+                  digest
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          owner: splitId,
+          type: `0x2::coin::Coin<${innerType}>`,
+        },
       });
 
-      // Sign and execute
-      const result = await grpcClient.signAndExecuteTransaction({
-        signer: keypair,
-        transaction: tx,
-      });
-      if (result.$kind === "FailedTransaction") {
-        throw new Error("Transaction failed");
+      const objectsResults = await graphqlClient.query({
+        query: `
+    query GetCoinObjects($owner: SuiAddress!) {
+      address(address: $owner) {
+        objects(first: 50) {
+          nodes {
+            address
+            version
+            digest
+            contents {
+              type { repr }
+            }
+          }
+        }
       }
+    }
+  `,
+        variables: {
+          owner: splitId,
+        },
+      });
 
       console.log(
-        `[Process] Successfully processed coin ${coinId} for Split ${splitId}`,
+        "RAW OBJECTS:",
+        JSON.stringify(
+          (objectsResults.data as any)?.address?.objects?.nodes,
+          null,
+          2,
+        ),
       );
+
+      const coinObjects =
+        (objectsResult.data as any)?.address?.objects?.nodes ?? [];
+      console.log(
+        `[Process] Found ${coinObjects.length} coin objects for type ${innerType}`,
+      );
+
+      for (const coin of coinObjects) {
+        const tx = new Transaction();
+        tx.moveCall({
+          target: `${PACKAGE_ID}::slyce::process_received_coin`,
+          typeArguments: [innerType],
+          arguments: [
+            tx.object(PROTOCOL_CONFIG_ID),
+            tx.object(splitId),
+            tx.receivingRef({
+              objectId: coin.address,
+              version: coin.version,
+              digest: coin.digest,
+            }),
+          ],
+        });
+
+        const txResult = await grpcClient.signAndExecuteTransaction({
+          signer: keypair,
+          transaction: tx,
+        });
+
+        if (txResult.$kind === "FailedTransaction") {
+          console.error(`[Process] Failed for coin ${coin.address}`);
+          continue;
+        }
+
+        console.log(`[Process] Successfully processed coin ${coin.address}`);
+      }
     }
   } catch (err) {
     console.error(`[Process] Error processing split ${splitId}:`, err);

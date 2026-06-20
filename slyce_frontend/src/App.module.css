@@ -10,3 +10,9 @@
   padding: 2rem 7.5rem;
   background-color: var(--bg-primary);
 }
+
+@media (max-width: 1440px) {
+  .content {
+    padding: 2rem;
+  }
+}

@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import {
-  useCurrentAccount,
-  useCurrentClient,
-  useDAppKit,
-} from "@mysten/dapp-kit-react";
+import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
 import { Transaction } from "@mysten/sui/transactions";
+import { graphqlClient } from "../lib/suiClient";
 import {
   buildConfirmSplitTx,
   buildDistributeVaultTx,
@@ -193,50 +190,61 @@ export function useSplits() {
     return result.Transaction.digest;
   };
 
-  const client = useCurrentClient();
-
   const distributeVault = async (splitId: string): Promise<string> => {
     if (!currentAccount) throw new Error("Wallet not connected");
     const packageId = getPackageId();
     const protocolConfigId = getProtocolConfigId();
     if (!packageId) throw new Error("Contract not deployed");
 
-    // Fetch coins owned by the split to know which vaults to distribute
-    const coinObjects = await client.core.listCoins({
-      owner: splitId,
+    // Query FundsDepositedEvent to find what coin types are in the vault
+    const result = await graphqlClient.query({
+      query: `
+        query GetSplitDeposits($type: String) {
+          events(filter: { type: $type }, first: 50) {
+            nodes {
+              contents { json }
+            }
+          }
+        }
+      `,
+      variables: {
+        type: `${packageId}::slyce::FundsDepositedEvent`,
+      },
     });
 
-    console.log("Coins", coinObjects);
+    const nodes = (result.data as any)?.events?.nodes ?? [];
 
-    if (coinObjects.objects.length === 0) {
-      throw new Error("No funds found in this split to distribute");
+    // Collect unique coin types deposited to this split
+    const coinTypes = new Set<string>();
+    for (const node of nodes) {
+      const json = node.contents?.json;
+      if (json?.split_id === splitId && json?.coin_type) {
+        coinTypes.add(json.coin_type as string);
+      }
     }
 
-    // Get unique coin types from the split's coins
-    const coinTypes = [...new Set(coinObjects.objects.map((c: any) => c.type))];
+    if (coinTypes.size === 0) {
+      throw new Error("No funds found in this split to distribute");
+    }
 
     const tx = new Transaction();
 
     for (const coinType of coinTypes) {
-      // Extract inner type T from Coin<T>
-      const match = (coinType as string).match(/<([^>]+)>/);
-      const innerCoinType = match ? match[1] : coinType;
-
       buildDistributeVaultTx(
         tx,
-        innerCoinType as string,
+        coinType,
         splitId,
         packageId,
         protocolConfigId,
       );
     }
 
-    const result = await dAppKit.signAndExecuteTransaction({
+    const result2 = await dAppKit.signAndExecuteTransaction({
       transaction: tx,
     });
-    if (result.$kind === "FailedTransaction")
+    if (result2.$kind === "FailedTransaction")
       throw new Error("Transaction failed");
-    return result.Transaction.digest;
+    return result2.Transaction.digest;
   };
 
   return {

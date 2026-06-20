@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import LoadingState from "../../components/loadingState/LoadingState";
 import { getDistType } from "../../lib/helpers";
 import { useSplits } from "../../hooks/useSplits";
+import { useSplitBalances } from "../../hooks/useSplitBalances";
 
 export default function SplitDetails() {
   const { id } = useParams();
@@ -19,6 +20,7 @@ export default function SplitDetails() {
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
   const { split, loading } = useFetchSplitById(id || "");
   const { distributeVault } = useSplits();
+  const { assets } = useSplitBalances(id || "");
 
   const progress =
     (split?.confirmedCount || 0) / (split?.recipients.length || 0);
@@ -69,7 +71,11 @@ export default function SplitDetails() {
       ) : (
         <div className={styles.detailsGrid}>
           <div className={styles.leftColumn}>
-            <TokensCard address={id!} className={styles.tokensCard} />
+            <TokensCard
+              address={id!}
+              isSplit={true}
+              className={styles.tokensCard}
+            />
           </div>
 
           <div className={styles.rightColumn}>

@@ -3,9 +3,9 @@ import type { TransactionObjectArgument } from "@mysten/sui/transactions";
 import type { SplitFormData } from "../types";
 
 const DEFAULT_PACKAGE_ID =
-  "0x93f7a109dcf93223a8c8a51c182fb5da4ab94f65ea0dea4aab0e909fac4f3288";
+  "0x829200da6102925e460ede524f8cca03c0b76d8009a89222935bc4661bd3abec";
 const PROTOCOL_CONFIG_ID =
-  "0x650b81215e23271e7be8ec67fd7bb80f4ff1f36efedeb4fc7885db674c4ce8fc";
+  "0x0c682f43e79609b653af304163cada3b284c08abec1928361fb9edc5d90ddfa2";
 
 export function getPackageId(): string {
   return import.meta.env.VITE_PACKAGE_ID || DEFAULT_PACKAGE_ID;
