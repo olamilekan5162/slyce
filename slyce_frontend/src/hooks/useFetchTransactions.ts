@@ -53,7 +53,6 @@ export function useFetchTransactions() {
 
         for (const node of nodes) {
           const json = node.contents?.json;
-          console.log(json);
 
           if (!json) continue;
 

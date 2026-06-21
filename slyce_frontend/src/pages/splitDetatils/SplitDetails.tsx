@@ -48,13 +48,15 @@ export default function SplitDetails() {
         </div>
 
         <div className={styles.headerActions}>
-          <Button
-            variant="primary"
-            className={styles.editBtn}
-            onClick={() => navigate(`/app/splits/${split?.id}/edit`)}
-          >
-            <span>Edit Split</span>
-          </Button>
+          {!split?.isLocked && (
+            <Button
+              variant="primary"
+              className={styles.editBtn}
+              onClick={() => navigate(`/app/splits/${split?.id}/edit`)}
+            >
+              <span>Edit Split</span>
+            </Button>
+          )}
           {/* <Button
             variant="primary"
             className={styles.addParticipantBtn}
