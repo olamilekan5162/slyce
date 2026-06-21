@@ -209,7 +209,7 @@ const LandingPage = () => {
                 <h3>An Undeniable Promise (Code is Law)</h3>
                 <p>
                   It's not an IOU. Once a collaboration deal
-                  contract is deployed, it cannot be modified or ignored. Nobody needs to trust anyone—the protocol enforces the agreement.
+                  contract is deployed, it cannot be modified or ignored. Nobody needs to trust anyone, the protocol enforces the agreement.
                 </p>
               </div>
               <div className={styles.featureVisual}>
@@ -451,7 +451,7 @@ const LandingPage = () => {
             <h2>Code is Law</h2>
             <p>
               Your funds are protected by immutable smart contracts. Slyce is
-              entirely non-custodial—meaning we can never access, freeze, or
+              entirely non-custodial, meaning we can never access, freeze, or
               redirect your assets. Trust the math, not the middleman.
             </p>
           </motion.div>
