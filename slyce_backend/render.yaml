@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: slyce-backend
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm run start
+    envVars:
+      - key: ADMIN_SECRET_KEY
+        sync: false
+      - key: PACKAGE_ID
+        sync: false
+      - key: PROTOCOL_CONFIG_ID
+        sync: false
+      - key: NETWORK
+        value: testnet
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: EMAIL_PORT
+        value: 3001
