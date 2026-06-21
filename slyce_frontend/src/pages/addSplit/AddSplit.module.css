@@ -663,16 +663,60 @@
   width: 200px !important;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .topRowGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formCard {
+    padding: 24px !important;
+  }
+
+  .participantRow {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "address address"
+      "share delete";
+    gap: 16px;
+  }
+
+  .addressInputCol {
+    grid-area: address;
+  }
+
+  .shareInputCol {
+    grid-area: share;
+  }
+
+  .deleteCol {
+    grid-area: delete;
+  }
+
+  /* .totalSplitContainer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  } */
+
+  /* .progressBarTrack {
+    width: 100%;
+  }
+
+  .totalSplitPercentage {
+    align-self: flex-end;
+  } */
+
   .inviteItem {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
+
   .inviteItemRight {
     width: 100%;
     justify-content: space-between;
   }
+
   .linkBox {
     max-width: none;
     flex: 1;

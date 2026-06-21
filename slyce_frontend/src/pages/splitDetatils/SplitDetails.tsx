@@ -48,13 +48,15 @@ export default function SplitDetails() {
         </div>
 
         <div className={styles.headerActions}>
-          <Button
-            variant="primary"
-            className={styles.editBtn}
-            onClick={() => navigate(`/app/splits/${split?.id}/edit`)}
-          >
-            <span>Edit Collaboration</span>
-          </Button>
+          {!split?.isLocked && (
+            <Button
+              variant="primary"
+              className={styles.editBtn}
+              onClick={() => navigate(`/app/splits/${split?.id}/edit`)}
+            >
+              <span>Edit Split</span>
+            </Button>
+          )}
           {/* <Button
             variant="primary"
             className={styles.addParticipantBtn}
@@ -142,7 +144,8 @@ export default function SplitDetails() {
               {Number(split?.confirmedCount) !==
               Number(split?.recipients.length) ? (
                 <p className={styles.configDescription}>
-                  Waiting for all participants to confirm the current collaboration deal before activating.
+                  Waiting for all participants to confirm the current
+                  collaboration deal before activating.
                 </p>
               ) : (
                 <p className={styles.configDescription}>
@@ -164,7 +167,9 @@ export default function SplitDetails() {
                 <h4 className={styles.specTitle}>TECHNICAL SPECIFICATIONS</h4>
 
                 <div className={styles.specRow}>
-                  <span className={styles.specLabel}>Collaboration Address</span>
+                  <span className={styles.specLabel}>
+                    Collaboration Address
+                  </span>
                   <button
                     onClick={handleCopyAddress}
                     className={styles.copyAddressBtn}
