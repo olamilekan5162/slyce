@@ -38,41 +38,64 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className={styles.sidebar}>
-      <div>
-        <h1 className={styles.logo}>Slyce</h1>
+    <>
+      {/* Desktop Sidebar */}
+      <aside className={styles.desktopSidebar}>
+        <div>
+          <h1 className={styles.logo}>Slyce</h1>
 
-        <nav className={styles.nav}>
-          {links.map((link) => {
-            const Icon = link.icon;
+          <nav className={styles.nav}>
+            {links.map((link) => {
+              const Icon = link.icon;
 
-            return (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                end={link.path === "/app"}
-                className={({ isActive }) =>
-                  `${styles.navItem} ${isActive ? styles.active : ""}`
-                }
-              >
-                <Icon size={20} />
-                <span>{link.label}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
-      </div>
+              return (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  end={link.path === "/app"}
+                  className={({ isActive }) =>
+                    `${styles.navItem} ${isActive ? styles.active : ""}`
+                  }
+                >
+                  <Icon size={20} />
+                  <span>{link.label}</span>
+                </NavLink>
+              );
+            })}
+          </nav>
+        </div>
 
-      <div className={styles.logout}>
-        <Button
-          variant="unstyled"
-          className={styles.logoutBtn}
-          onClick={() => handleDisconnect()}
-        >
-          <LogOut size={20} />
-          <span>Logout</span>
-        </Button>
-      </div>
-    </aside>
+        <div className={styles.logout}>
+          <Button
+            variant="unstyled"
+            className={styles.logoutBtn}
+            onClick={() => handleDisconnect()}
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </Button>
+        </div>
+      </aside>
+
+      {/* Mobile Bottom Tab Bar */}
+      <nav className={styles.mobileTabBar}>
+        {links.map((link) => {
+          const Icon = link.icon;
+          return (
+            <NavLink
+              key={link.path}
+              to={link.path}
+              end={link.path === "/app"}
+              className={({ isActive }) =>
+                `${styles.mobileNavItem} ${isActive ? styles.mobileActive : ""}`
+              }
+            >
+              <Icon size={20} />
+              <span>{link.label}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
+    </>
   );
 }

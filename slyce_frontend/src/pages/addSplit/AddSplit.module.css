@@ -516,3 +516,165 @@
   color: #111827;
   pointer-events: none;
 }
+
+.invitesContainer {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.invitesHeader {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.invitesHeader h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.invitesHeader p {
+  font-size: 14px;
+  color: var(--text-accent);
+}
+
+.invitesList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.inviteItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fafaf9;
+  border: 1px solid #f3f4f6;
+  transition: all 0.2s ease;
+}
+
+.inviteItem:hover {
+  background: #ffffff;
+  border-color: #2e7d6e;
+  box-shadow: 0 4px 12px rgba(46, 125, 110, 0.08);
+}
+
+.inviteItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.inviteAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2e7d6e 0%, #1f2937 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.inviteDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inviteName {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.inviteRole {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.inviteItemRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.linkBox {
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 8px 12px;
+  max-width: 200px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.linkText {
+  display: block;
+  font-size: 13px;
+  color: #4b5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: monospace;
+}
+
+.copyIconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #111827;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copyIconButton:hover {
+  background: #2e7d6e;
+  transform: translateY(-1px);
+}
+
+.copyIconButton.copied {
+  background: #10b981;
+}
+
+.actionFooter {
+  display: flex;
+  justify-content: center;
+}
+
+.doneBtn {
+  width: 200px !important;
+}
+
+@media (max-width: 640px) {
+  .inviteItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .inviteItemRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .linkBox {
+    max-width: none;
+    flex: 1;
+  }
+}
