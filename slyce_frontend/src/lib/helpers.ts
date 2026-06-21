@@ -116,28 +116,54 @@ export const fetchBalanceInDollars = async (
   address: string,
 ) => {
   try {
-    const { balances } = await client.core.listBalances({
-      owner: address,
+    const result: any = await graphqlClient.query({
+      query: `
+        query GetVaultBalances($id: SuiAddress!) {
+          object(address: $id) {
+            dynamicFields(first: 20) {
+              nodes {
+                value {
+                  ... on MoveValue {
+                    json
+                    type { repr }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: { id: address },
+    });
+
+    const nodes = result.data?.object?.dynamicFields?.nodes ?? [];
+    const vaultNodes = nodes.filter((node: any) => {
+      const repr: string = node.value?.type?.repr ?? "";
+      return repr.includes("::balance::Balance<");
     });
 
     const userAssets: Asset[] = [];
 
-    for (const balance of balances) {
-      const meta = await client.core.getCoinMetadata({
-        coinType: balance.coinType,
-      });
-      const metadata = meta.coinMetadata;
-      const decimals = metadata?.decimals ?? 0;
-      const formattedBalance = Number(balance.balance) / Math.pow(10, decimals);
+    for (const node of vaultNodes) {
+      const repr: string = node.value?.type?.repr ?? "";
+      const match = repr.match(/::balance::Balance<(.+)>$/);
+      if (!match) continue;
 
-      const { price: priceUsd, change24h } = await getTokenPrice(
-        balance.coinType,
-      );
+      const coinType = match[1];
+      const rawAmount = Number(node.value?.json ?? 0);
+      if (rawAmount === 0) continue;
+
+      const meta = await client.core.getCoinMetadata({ coinType });
+      const metadata = meta.coinMetadata;
+      const decimals = metadata?.decimals ?? 9;
+      const formattedBalance = rawAmount / Math.pow(10, decimals);
+
+      const { price: priceUsd, change24h } = await getTokenPrice(coinType);
       const usdValue = formattedBalance * priceUsd;
 
       userAssets.push({
-        coinType: balance.coinType,
-        symbol: metadata?.symbol ?? "",
+        coinType,
+        symbol: metadata?.symbol ?? coinType.split("::").pop() ?? "",
         name: metadata?.name ?? "",
         decimals,
         iconUrl: metadata?.iconUrl ?? "",
@@ -146,7 +172,7 @@ export const fetchBalanceInDollars = async (
           usdValue > 0
             ? `$${usdValue.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
+                maximumFractionDigits: Math.max(2, decimals),
               })}`
             : "$0.00",
         priceChangePercent: change24h,
@@ -161,6 +187,7 @@ export const fetchBalanceInDollars = async (
     return { totalUsd };
   } catch (err) {
     console.error("Error fetching balances:", err);
+    return { totalUsd: 0 };
   }
 };
 

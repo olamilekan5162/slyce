@@ -32,7 +32,7 @@ export default function TokensCard({
               <>
                 <span className={styles.donutAmount}>${totalBalance}</span>
                 <span className={styles.donutChange}>
-                  +{portfolioChange?.amount?.toFixed(2) || "0.00"}
+                  {portfolioChange?.amount?.toFixed(2) || "0.00"}
                 </span>
               </>
             )}

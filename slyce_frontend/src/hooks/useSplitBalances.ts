@@ -71,7 +71,6 @@ export function useSplitBalances(splitId: string) {
 
           const { price: priceUsd, change24h } = await getTokenPrice(coinType);
           const usdValue = formattedBalance * priceUsd;
-          console.log(metadata);
 
           vaultAssets.push({
             coinType,
