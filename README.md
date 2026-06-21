@@ -107,6 +107,11 @@ git clone https://github.com/olamilekan5162/slyce
 cd slyce/slyce_frontend
 npm install
 npm run dev
+
+
+cd ../slyce_backend
+npm install
+npm run start
 ```
 
 ---
