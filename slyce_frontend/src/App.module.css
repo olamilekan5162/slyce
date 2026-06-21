@@ -16,3 +16,16 @@
     padding: 2rem;
   }
 }
+
+@media (max-width: 768px) {
+  .layout {
+    display: block;
+  }
+  
+  .content {
+    padding: 16px;
+    padding-bottom: 100px; /* Space for bottom tab bar */
+    height: auto;
+    min-height: 100vh;
+  }
+}

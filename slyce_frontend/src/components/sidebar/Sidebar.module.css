@@ -1,4 +1,4 @@
-.sidebar {
+.desktopSidebar {
   width: 300px;
   height: 100vh;
   padding: 32px 20px 24px 0;
@@ -70,4 +70,55 @@
 
 .logoutBtn:hover {
   color: white;
+}
+
+/* Mobile Tab Bar Styles */
+.mobileTabBar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktopSidebar {
+    display: none;
+  }
+
+  .mobileTabBar {
+    display: flex;
+    width: 100%;
+    height: 80px;
+    padding: 0 8px;
+    border-radius: 24px 24px 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    background-color: var(--bg-secondary);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .mobileNavItem {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 4px;
+    border-radius: 12px;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.25s ease;
+  }
+
+  .mobileNavItem span {
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .mobileActive {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
 }

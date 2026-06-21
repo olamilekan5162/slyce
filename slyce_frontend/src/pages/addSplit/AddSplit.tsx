@@ -242,30 +242,58 @@ export default function AddSplit() {
 
         {inviteRecipients.length > 0 ? (
           <div className={styles.invitesContainer}>
-            {inviteRecipients.map((r, i) => {
-              // We need the original index to map to the correct passcode
-              const originalIndex = participants.findIndex((p) => p === r);
-              const link = `${window.location.origin}/confirm/${createdSplitId}?code=${invitePasscodes[originalIndex]}`;
-              return (
-                <Card key={i} variant="light" className={styles.inviteCard}>
-                  <p className={styles.inviteLabel}>
-                    {r.address || `Recipient ${originalIndex + 1}`}
-                  </p>
-                  <p className={styles.inviteLink}>{link}</p>
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      navigator.clipboard.writeText(link);
-                      setCopiedIndex(i);
-                      setTimeout(() => setCopiedIndex(null), 2000);
-                    }}
-                  >
-                    <Copy size={16} />
-                    {copiedIndex === i ? "Copied!" : "Copy Link"}
-                  </Button>
-                </Card>
-              );
-            })}
+            <div className={styles.invitesHeader}>
+              <h3>Participant Invite Links</h3>
+              <p>Share these unique links securely. Each link contains a one-time passcode.</p>
+            </div>
+            <div className={styles.invitesList}>
+              {inviteRecipients.map((r, i) => {
+                const originalIndex = participants.findIndex((p) => p === r);
+                const link = `${window.location.origin}/confirm/${createdSplitId}?code=${invitePasscodes[originalIndex]}`;
+                const isCopied = copiedIndex === i;
+                
+                return (
+                  <div key={i} className={styles.inviteItem}>
+                    <div className={styles.inviteItemLeft}>
+                      <div className={styles.inviteAvatar}>
+                         {r.address ? r.address.substring(0, 2).toUpperCase() : "U"}
+                      </div>
+                      <div className={styles.inviteDetails}>
+                        <span className={styles.inviteName}>
+                          {r.address ? (r.address.startsWith("0x") ? `${r.address.slice(0,6)}...${r.address.slice(-4)}` : r.address) : `Recipient ${originalIndex + 1}`}
+                        </span>
+                        <span className={styles.inviteRole}>
+                          {r.share}% Share
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className={styles.inviteItemRight}>
+                      <div className={styles.linkBox}>
+                         <span className={styles.linkText}>{link}</span>
+                      </div>
+                      <button 
+                        type="button"
+                        className={`${styles.copyIconButton} ${isCopied ? styles.copied : ""}`}
+                        onClick={() => {
+                          navigator.clipboard.writeText(link);
+                          setCopiedIndex(i);
+                          setTimeout(() => setCopiedIndex(null), 2000);
+                        }}
+                        title="Copy Link"
+                      >
+                        {isCopied ? <Check size={18} /> : <Copy size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className={styles.actionFooter}>
+              <Button variant="primary" onClick={() => window.history.back()} className={styles.doneBtn}>
+                Done & Return
+              </Button>
+            </div>
           </div>
         ) : (
           <div

@@ -49,19 +49,19 @@ export default function SplitDetails() {
 
         <div className={styles.headerActions}>
           <Button
-            variant="ghost"
+            variant="primary"
             className={styles.editBtn}
             onClick={() => navigate(`/app/splits/${split?.id}/edit`)}
           >
             <span>Edit Split</span>
           </Button>
-          <Button
+          {/* <Button
             variant="primary"
             className={styles.addParticipantBtn}
             onClick={() => setIsAddParticipantOpen(true)}
           >
             <span>Add Participant</span>
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -189,15 +189,16 @@ export default function SplitDetails() {
                   </span>
                 </div>
                 <div className={styles.distributeBtn}>
-                  {Number(split?.confirmedCount) ===
-                    Number(split?.recipients.length) && (
-                    <Button
-                      variant="primary"
-                      onClick={() => handleDistribute(split?.id || "")}
-                    >
-                      Distribute Split
-                    </Button>
-                  )}
+                  {Number(split?.distributionType) === 0 &&
+                    Number(split?.confirmedCount) ===
+                      Number(split?.recipients.length) && (
+                      <Button
+                        variant="primary"
+                        onClick={() => handleDistribute(split?.id || "")}
+                      >
+                        Distribute Split
+                      </Button>
+                    )}
                 </div>
 
                 {/* <div className={styles.specRow}>
