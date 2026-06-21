@@ -211,9 +211,34 @@ export default function AddSplit() {
       });
       setCreatedSplitId(result.splitId);
       setInvitePasscodes(result.passcodes);
-      toast.success("Collaboration started successfully", {
-        id: toastId,
-      });
+      toast.success("Collaboration started successfully", { id: toastId });
+
+      // Send invite emails to any email-type recipients
+      const emailRecipients = participants
+        .map((p, i) => ({ ...p, passcode: result.passcodes[i] }))
+        .filter((p) => p.type === "email" && p.address && p.passcode);
+
+      if (emailRecipients.length > 0) {
+        try {
+          await fetch(`${import.meta.env.VITE_EMAIL_API_URL || "http://localhost:3001"}/api/invite`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              splitId: result.splitId,
+              splitName,
+              recipients: emailRecipients.map((r) => ({
+                email: r.address,
+                share: parseFloat(r.share),
+                passcode: r.passcode,
+                recipientIndex: participants.indexOf(r),
+              })),
+            }),
+          });
+          toast.success(`Invite sent to ${emailRecipients.length} collaborator${emailRecipients.length > 1 ? "s" : ""}`);
+        } catch {
+          toast.error("Collaboration created, but invite emails could not be sent.");
+        }
+      }
     } catch (err: any) {
       console.log(err);
       toast.error(err.message, {
@@ -249,7 +274,7 @@ export default function AddSplit() {
             <div className={styles.invitesList}>
               {inviteRecipients.map((r, i) => {
                 const originalIndex = participants.findIndex((p) => p === r);
-                const link = `${window.location.origin}/confirm/${createdSplitId}?code=${invitePasscodes[originalIndex]}`;
+                const link = `${window.location.origin}/confirm/${createdSplitId}?code=${invitePasscodes[originalIndex]}&idx=${originalIndex}`;
                 const isCopied = copiedIndex === i;
                 
                 return (

@@ -44,15 +44,28 @@ export default function ConfirmSplit() {
 
   // Find the recipient index for the connected wallet
   const recipientIndex = (() => {
-    if (!split || !currentAccount) return -1;
-    // First try: match by confirmed_address or contact field
-    const idx = split.recipients.findIndex(
-      (r: any) =>
-        r.confirmed_address?.toLowerCase() ===
-          currentAccount.address.toLowerCase() ||
-        r.contact?.toLowerCase() === currentAccount.address.toLowerCase(),
-    );
-    return idx;
+    if (!split) return -1;
+
+    // 1. Try wallet address match (for wallet-type recipients already confirmed)
+    if (currentAccount) {
+      const idx = split.recipients.findIndex(
+        (r: any) =>
+          r.confirmed_address?.toLowerCase() === currentAccount.address.toLowerCase() ||
+          r.contact?.toLowerCase() === currentAccount.address.toLowerCase(),
+      );
+      if (idx >= 0) return idx;
+    }
+
+    // 2. Fallback: use the idx param from the invite URL (for email-type recipients)
+    const urlIdx = searchParams.get("idx");
+    if (urlIdx !== null) {
+      const parsed = parseInt(urlIdx, 10);
+      if (!isNaN(parsed) && parsed >= 0 && parsed < split.recipients.length) {
+        return parsed;
+      }
+    }
+
+    return -1;
   })();
 
   // The recipient we're confirming for

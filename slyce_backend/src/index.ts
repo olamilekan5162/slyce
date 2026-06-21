@@ -5,6 +5,7 @@ import { Transaction } from "@mysten/sui/transactions";
 import { decodeSuiPrivateKey } from "@mysten/sui/cryptography";
 import dotenv from "dotenv";
 import { loadTrackedSplits, addTrackedSplit } from "./store.js";
+import { startEmailServer } from "./server.js";
 
 dotenv.config();
 
@@ -238,5 +239,6 @@ async function runLoop() {
 
 // Start polling every 15 seconds
 console.log("Starting Slyce Automation Service...");
+startEmailServer();
 runLoop();
 setInterval(runLoop, 15 * 1000);

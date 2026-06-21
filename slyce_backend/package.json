@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
+    "email": "tsx src/email-server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
