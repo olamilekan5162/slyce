@@ -22,7 +22,16 @@
 /* Brand header */
 .brandHeader {
   padding: 32px 32px 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
+
+/* .brandLogo {
+  height: 22px;
+  width: auto;
+  display: block;
+} */
 
 .brandName {
   font-size: 18px;

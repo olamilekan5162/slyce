@@ -32,10 +32,34 @@
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #fff;
+}
+
+/* .logoImg {
+  height: 32px;
+  width: auto;
+  display: block;
+} */
+
+.footerBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.footerLogoImg {
+  height: 22px;
+  width: auto;
+  display: block;
 }
 
 .nav {

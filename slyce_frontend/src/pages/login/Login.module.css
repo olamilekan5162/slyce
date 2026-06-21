@@ -23,6 +23,9 @@
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -30,6 +33,12 @@
   cursor: pointer;
   z-index: 10;
 }
+
+/* .logoImg {
+  height: 24px;
+  width: auto;
+  display: block;
+} */
 
 .leftTextContent {
   display: flex;

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./Login.module.css";
 import authImg from "../../assets/auth.png";
+import slycelogo from "../../assets/slyce_logo.svg";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -23,7 +24,13 @@ const Login = () => {
         }}
       >
         <div className={styles.logo} onClick={() => navigate("/")}>
-          Slyce
+          <img
+            src={slycelogo}
+            alt="Slyce"
+            className={styles.logoImg}
+            width={48}
+          />
+          <span>Slyce</span>
         </div>
 
         <div className={styles.leftTextContent}>

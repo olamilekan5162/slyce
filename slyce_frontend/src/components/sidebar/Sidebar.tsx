@@ -4,6 +4,7 @@ import { Home, ArrowUpDown, LogOut, User, Wallet } from "lucide-react";
 import Button from "../button/Button";
 import { dAppKit } from "../../lib/suiClient";
 import toast from "react-hot-toast";
+import slycelogo from "../../assets/slyce_logo.svg";
 
 const links = [
   {
@@ -42,7 +43,15 @@ export default function Sidebar() {
       {/* Desktop Sidebar */}
       <aside className={styles.desktopSidebar}>
         <div>
-          <h1 className={styles.logo}>Slyce</h1>
+          <div className={styles.logo}>
+            <img
+              src={slycelogo}
+              alt="Slyce"
+              className={styles.logoImg}
+              width={48}
+            />
+            <span>Slyce</span>
+          </div>
 
           <nav className={styles.nav}>
             {links.map((link) => {

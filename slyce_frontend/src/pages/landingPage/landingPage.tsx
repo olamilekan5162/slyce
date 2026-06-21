@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
+import slycelogo from "../../assets/slyce_logo.svg";
 import Button from "../../components/button/Button";
 import LoginModal from "../../components/loginModal/LoginModal";
 import styles from "./landingPage.module.css";
@@ -30,7 +31,15 @@ const LandingPage = () => {
       {/* Hero Container */}
       <div className={styles.heroContainer}>
         <header className={styles.header}>
-          <div className={styles.logo}>Slyce</div>
+          <div className={styles.logo}>
+            <img
+              src={slycelogo}
+              width={48}
+              alt="Slyce"
+              className={styles.logoImg}
+            />
+            <span>Slyce</span>
+          </div>
           <nav className={styles.nav}>
             <span
               className={styles.navLink}
@@ -69,10 +78,7 @@ const LandingPage = () => {
                 Launch App
               </Button>
             ) : (
-              <Button
-                variant="primary"
-                onClick={() => setIsLoginOpen(true)}
-              >
+              <Button variant="primary" onClick={() => setIsLoginOpen(true)}>
                 Log in
               </Button>
             )}
@@ -92,13 +98,17 @@ const LandingPage = () => {
           </motion.h1>
           <motion.p variants={fadeUpVariant} className={styles.heroSubtitle}>
             Make a credible offer to any professional without upfront cash.
-            Slyce replaces upfront payments with guaranteed on-chain agreements. Lock in their cut before the work begins. Paid automatically the moment earnings arrive.
+            Slyce replaces upfront payments with guaranteed on-chain agreements.
+            Lock in their cut before the work begins. Paid automatically the
+            moment earnings arrive.
           </motion.p>
           <motion.div variants={fadeUpVariant} className={styles.heroActions}>
             <Button
               size="lg"
               variant="primary"
-              onClick={() => connection.isConnected ? navigate("/app") : setIsLoginOpen(true)}
+              onClick={() =>
+                connection.isConnected ? navigate("/app") : setIsLoginOpen(true)
+              }
             >
               Start Collaborating
             </Button>
@@ -155,7 +165,8 @@ const LandingPage = () => {
               <div className={styles.useCaseOverlay} />
               <h3 className={styles.useCaseTitle}>Music & Audio</h3>
               <p className={styles.useCaseDesc}>
-                Secure top producers and featured artists by locking in their royalties before they step into the studio.
+                Secure top producers and featured artists by locking in their
+                royalties before they step into the studio.
               </p>
             </motion.div>
 
@@ -168,7 +179,8 @@ const LandingPage = () => {
               <div className={styles.useCaseOverlay} />
               <h3 className={styles.useCaseTitle}>Film & Video</h3>
               <p className={styles.useCaseDesc}>
-                Get directors, editors, and videographers on board by guaranteeing their cut of the final project's revenue.
+                Get directors, editors, and videographers on board by
+                guaranteeing their cut of the final project's revenue.
               </p>
             </motion.div>
 
@@ -181,7 +193,8 @@ const LandingPage = () => {
               <div className={styles.useCaseOverlay} />
               <h3 className={styles.useCaseTitle}>Indie Teams & Content</h3>
               <p className={styles.useCaseDesc}>
-                Build a world-class team of marketers and creators without a massive starting budget. Offer an undeniable promise.
+                Build a world-class team of marketers and creators without a
+                massive starting budget. Offer an undeniable promise.
               </p>
             </motion.div>
           </motion.div>
@@ -204,8 +217,9 @@ const LandingPage = () => {
               <div className={styles.featureText}>
                 <h3>An Undeniable Promise (Code is Law)</h3>
                 <p>
-                  It's not an IOU. Once a collaboration deal
-                  contract is deployed, it cannot be modified or ignored. Nobody needs to trust anyone, the protocol enforces the agreement.
+                  It's not an IOU. Once a collaboration deal contract is
+                  deployed, it cannot be modified or ignored. Nobody needs to
+                  trust anyone, the protocol enforces the agreement.
                 </p>
               </div>
               <div className={styles.featureVisual}>
@@ -222,20 +236,26 @@ const LandingPage = () => {
                       slyce::deal &#123;
                       <br />
                       &nbsp;&nbsp;
-                      <span className={styles.codeKeyword}>public struct</span>{" "}
-                      <span className={styles.codeVar}>Deal</span>{" "}
-                      has key, store &#123;<br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;
-                      id: UID,<br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;
-                      collaborators: vector&lt;address&gt;,<br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;
-                      cuts: vector&lt;u64&gt;,<br />
+                      <span className={styles.codeKeyword}>
+                        public struct
+                      </span>{" "}
+                      <span className={styles.codeVar}>Deal</span> has key,
+                      store &#123;
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp; id: UID,
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp; collaborators:
+                      vector&lt;address&gt;,
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp; cuts: vector&lt;u64&gt;,
+                      <br />
                       &nbsp;&nbsp;&#125;
                       <br />
                       <br />
                       &nbsp;&nbsp;
-                      <span className={styles.codeKeyword}>public fun</span>{" "}
+                      <span className={styles.codeKeyword}>
+                        public fun
+                      </span>{" "}
                       <span className={styles.codeFunc}>release_earnings</span>
                       (deal: &Deal) &#123;
                       <br />
@@ -280,7 +300,9 @@ const LandingPage = () => {
               <div className={styles.featureText}>
                 <h3>Atomic, Simultaneous Payouts</h3>
                 <p>
-                  No one gets paid while someone else waits. The moment money hits the contract, every collaborator receives their exact cut simultaneously.
+                  No one gets paid while someone else waits. The moment money
+                  hits the contract, every collaborator receives their exact cut
+                  simultaneously.
                 </p>
               </div>
               <div className={styles.featureVisual}>
@@ -326,7 +348,8 @@ const LandingPage = () => {
               <div className={styles.featureText}>
                 <h3>No Crypto Knowledge Required</h3>
                 <p>
-                  Skip the wallet setup. Collaborators can join and securely sign agreements using just their Google account via zkLogin.
+                  Skip the wallet setup. Collaborators can join and securely
+                  sign agreements using just their Google account via zkLogin.
                 </p>
               </div>
               <div className={styles.featureVisual}>
@@ -459,7 +482,10 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className={styles.footer}>
         <div className={styles.footerMain}>
-          <div className={styles.footerBrand}>Slyce</div>
+          <div className={styles.footerBrand}>
+            <img src={slycelogo} alt="Slyce" className={styles.footerLogoImg} />
+            <span>Slyce</span>
+          </div>
           <div className={styles.footerLinks}>
             <span className={styles.footerLink}>Twitter</span>
             <span className={styles.footerLink}>Discord</span>

@@ -10,6 +10,7 @@ import { useSplits } from "../../hooks/useSplits";
 import { formatAddress } from "../../lib/helpers";
 import LoadingState from "../../components/loadingState/LoadingState";
 import toast from "react-hot-toast";
+import slycelogo from "../../assets/slyce_logo.svg";
 
 const PASSCODE_LENGTH = 6;
 
@@ -50,7 +51,8 @@ export default function ConfirmSplit() {
     if (currentAccount) {
       const idx = split.recipients.findIndex(
         (r: any) =>
-          r.confirmed_address?.toLowerCase() === currentAccount.address.toLowerCase() ||
+          r.confirmed_address?.toLowerCase() ===
+            currentAccount.address.toLowerCase() ||
           r.contact?.toLowerCase() === currentAccount.address.toLowerCase(),
       );
       if (idx >= 0) return idx;
@@ -197,6 +199,12 @@ export default function ConfirmSplit() {
       <div className={styles.inviteCard}>
         {/* Brand header */}
         <div className={styles.brandHeader}>
+          <img
+            src={slycelogo}
+            width={48}
+            alt="Slyce"
+            className={styles.brandLogo}
+          />
           <span className={styles.brandName}>Slyce</span>
         </div>
 
