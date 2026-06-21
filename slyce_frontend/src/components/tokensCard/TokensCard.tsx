@@ -56,9 +56,7 @@ export default function TokensCard({
     labels: hasAssets ? assets.map((a) => a.symbol) : ["No tokens"],
     datasets: [
       {
-        data: hasAssets
-          ? assets.map((a) => parseUsd(a.usdValue))
-          : [1],
+        data: hasAssets ? assets.map((a) => parseUsd(a.usdValue || "")) : [1],
         backgroundColor: hasAssets
           ? assets.map((_, i) => SLICE_COLORS[i % SLICE_COLORS.length])
           : [EMPTY_COLOR],
@@ -125,9 +123,7 @@ export default function TokensCard({
             const asset = assets[ctx.dataIndex];
             const val = parseUsd(asset?.usdValue || "0");
             const pct =
-              totalBalance > 0
-                ? ((val / totalBalance) * 100).toFixed(1)
-                : "0";
+              totalBalance > 0 ? ((val / totalBalance) * 100).toFixed(1) : "0";
             return ` ${asset?.symbol}: ${asset?.usdValue} (${pct}%)`;
           },
         },
@@ -159,9 +155,7 @@ export default function TokensCard({
         )}
       </div>
 
-      <div className={styles.sectionHeader}>
-        {!loading && <h3>Tokens</h3>}
-      </div>
+      <div className={styles.sectionHeader}>{!loading && <h3>Tokens</h3>}</div>
 
       <div className={styles.tokensList}>
         {!loading && assets.length === 0 && (

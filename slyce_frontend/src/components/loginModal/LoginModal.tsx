@@ -45,9 +45,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   // Identify wallets by name using the exact names from registration
   const slushWallet = wallets.find((w) => w.name === "Slush");
   const googleWallet = wallets.find((w) => w.name === "Sign in with Google");
-  const facebookWallet = wallets.find(
-    (w) => w.name === "Sign in with Facebook",
-  );
+  // const facebookWallet = wallets.find(
+  //   (w) => w.name === "Sign in with Facebook",
+  // );
   const hasWallets = wallets.length > 0;
 
   return (
