@@ -104,6 +104,8 @@
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
+  color: #0284c7;
+  background-color: #e0f2fe;
 }
 
 .bgAvatarDark {
@@ -338,4 +340,31 @@
   font-size: 14px;
   font-weight: 600;
   color: #111827;
+}
+
+@media (max-width: 1024px) {
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .participantsCard,
+  .configCard {
+    padding: 24px !important;
+  }
+
+  .collaboratorRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .collabLeft,
+  .collabRight {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
