@@ -68,57 +68,65 @@ const Dashboard = () => {
           <Card variant="light">
             <div className={styles.sectionHeader}>
               <h3>Recent Collaboration</h3>
-              <a href="#" className={styles.seeAllLink}>
-                See Details <ChevronRight size={14} />
-              </a>
+              {lastSplit && (
+                <a href="#" className={styles.seeAllLink}>
+                  See Details <ChevronRight size={14} />
+                </a>
+              )}
             </div>
 
-            <div className={styles.splitContainer}>
-              <Card variant="cream" className={styles.creamCard}>
-                <div className={styles.splitIcon}>
-                  <DollarSign size={24} color="#3e9b8f" />
-                </div>
-                <div>
-                  <div className={styles.splitTotalLabel}>
-                    Total Paid Out
+            {!lastSplit ? (
+              <div className={styles.emptyState}>
+                <p>No recent collaborations found.</p>
+              </div>
+            ) : (
+              <div className={styles.splitContainer}>
+                <Card variant="cream" className={styles.creamCard}>
+                  <div className={styles.splitIcon}>
+                    <DollarSign size={24} color="#3e9b8f" />
                   </div>
-                  <div className={styles.splitTotalAmount}>
-                    ${lastSplit?.totalUsd || 0}
+                  <div>
+                    <div className={styles.splitTotalLabel}>
+                      Total Paid Out
+                    </div>
+                    <div className={styles.splitTotalAmount}>
+                      ${lastSplit?.totalUsd || 0}
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
 
-              <div className={styles.splitDetailsGrid}>
-                <div className={`${styles.detailCol} ${styles.borderDark}`}>
-                  <div className={styles.detailLabel}>Creator</div>
-                  <div className={styles.detailValue}>
-                    {formatAddress(lastSplit?.creator || "") || 0x00}
+                <div className={styles.splitDetailsGrid}>
+                  <div className={`${styles.detailCol} ${styles.borderDark}`}>
+                    <div className={styles.detailLabel}>Creator</div>
+                    <div className={styles.detailValue}>
+                      {formatAddress(lastSplit?.creator || "") || 0x00}
+                    </div>
                   </div>
-                </div>
-                <div className={`${styles.detailCol} ${styles.borderBlue}`}>
-                  <div className={styles.detailLabel}>Payout Type</div>
-                  <div className={styles.detailValue}>
-                    {getDistType(Number(lastSplit?.distributionType))}
+                  <div className={`${styles.detailCol} ${styles.borderBlue}`}>
+                    <div className={styles.detailLabel}>Payout Type</div>
+                    <div className={styles.detailValue}>
+                      {getDistType(Number(lastSplit?.distributionType))}
+                    </div>
                   </div>
-                </div>
-                <div className={`${styles.detailCol} ${styles.borderGreen}`}>
-                  <div className={styles.detailLabel}>Share</div>
-                  <div className={styles.detailValue}>
-                    {(share?.share ?? 0) / 100 || 0}%
+                  <div className={`${styles.detailCol} ${styles.borderGreen}`}>
+                    <div className={styles.detailLabel}>Share</div>
+                    <div className={styles.detailValue}>
+                      {(share?.share ?? 0) / 100 || 0}%
+                    </div>
                   </div>
-                </div>
-                <div className={`${styles.detailCol} ${styles.borderOrange}`}>
-                  <div className={styles.detailLabel}>Received</div>
-                  <div className={styles.detailValue}>
-                    $
-                    {(
-                      (lastSplit?.totalUsd || 0) *
-                      ((share?.share ?? 0) / 10000 || 1)
-                    ).toFixed(2)}
+                  <div className={`${styles.detailCol} ${styles.borderOrange}`}>
+                    <div className={styles.detailLabel}>Received</div>
+                    <div className={styles.detailValue}>
+                      $
+                      {(
+                        (lastSplit?.totalUsd || 0) *
+                        ((share?.share ?? 0) / 10000 || 1)
+                      ).toFixed(2)}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </Card>
 
           <TransactionTable

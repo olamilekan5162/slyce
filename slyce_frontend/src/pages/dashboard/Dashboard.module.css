@@ -91,6 +91,21 @@
   align-items: center;
 }
 
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  gap: 8px;
+  color: var(--text-accent);
+}
+
+.emptyState p {
+  font-size: 14px;
+}
+
 /* Recent Split */
 .splitContainer {
   display: flex;

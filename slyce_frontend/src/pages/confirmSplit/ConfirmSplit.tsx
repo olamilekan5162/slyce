@@ -3,7 +3,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Button from "../../components/button/Button";
 import LoginModal from "../../components/loginModal/LoginModal";
 import styles from "./ConfirmSplit.module.css";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { useFetchSplitById } from "../../hooks/useFetchSplitById";
 import { useSplits } from "../../hooks/useSplits";
@@ -19,6 +19,7 @@ export default function ConfirmSplit() {
   const urlCode = searchParams.get("code") ?? "";
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const navigate = useNavigate();
   const [passcode, setPasscode] = useState<string[]>(
     Array(PASSCODE_LENGTH).fill(""),
   );
@@ -138,6 +139,7 @@ export default function ConfirmSplit() {
       await confirmSplit(id, recipientIndex, passcodeBytes);
       toast.success("Collaboration confirmed successfully!", { id: toastId });
       setIsConfirmed(true);
+      setTimeout(() => navigate("/app"), 2000);
     } catch (err: any) {
       toast.error(err.message ?? "Confirmation failed", { id: toastId });
     }

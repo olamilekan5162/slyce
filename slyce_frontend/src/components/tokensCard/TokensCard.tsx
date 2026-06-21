@@ -41,10 +41,15 @@ export default function TokensCard({
       </div>
 
       <div className={styles.sectionHeader}>
-        {loading ? "" : assets.length > 0 && <h3>Tokens</h3>}
+        {loading ? "" : <h3>Tokens</h3>}
       </div>
 
       <div className={styles.tokensList}>
+        {!loading && assets.length === 0 && (
+          <div className={styles.emptyState}>
+            <p>No tokens found</p>
+          </div>
+        )}
         {assets.map((asset, i) => (
           <div key={i} className={styles.tokenItem}>
             <div className={styles.tokenLeft}>

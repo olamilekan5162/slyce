@@ -65,21 +65,17 @@ const LandingPage = () => {
           </nav>
           <div className={styles.headerActions}>
             {connection.isConnected ? (
-              <Button variant="ghost" className={styles.navLink} disabled>
-                Connected
+              <Button variant="primary" onClick={() => navigate("/app")}>
+                Launch App
               </Button>
             ) : (
               <Button
-                variant="ghost"
-                className={styles.navLink}
+                variant="primary"
                 onClick={() => setIsLoginOpen(true)}
               >
                 Log in
               </Button>
             )}
-            <Button variant="primary" onClick={() => navigate("/app")}>
-              Launch App
-            </Button>
           </div>
         </header>
 
@@ -102,7 +98,7 @@ const LandingPage = () => {
             <Button
               size="lg"
               variant="primary"
-              onClick={() => navigate("/app")}
+              onClick={() => connection.isConnected ? navigate("/app") : setIsLoginOpen(true)}
             >
               Start Collaborating
             </Button>
@@ -213,6 +209,81 @@ const LandingPage = () => {
                 </p>
               </div>
               <div className={styles.featureVisual}>
+                <div className={styles.codeVisual}>
+                  <div className={styles.codeHeader}>
+                    <span className={styles.codeDot}></span>
+                    <span className={styles.codeDot}></span>
+                    <span className={styles.codeDot}></span>
+                    <span className={styles.codeTitle}>slyce_deal.move</span>
+                  </div>
+                  <pre className={styles.codeBody}>
+                    <code>
+                      <span className={styles.codeKeyword}>module</span>{" "}
+                      slyce::deal &#123;
+                      <br />
+                      &nbsp;&nbsp;
+                      <span className={styles.codeKeyword}>public struct</span>{" "}
+                      <span className={styles.codeVar}>Deal</span>{" "}
+                      has key, store &#123;<br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      id: UID,<br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      collaborators: vector&lt;address&gt;,<br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      cuts: vector&lt;u64&gt;,<br />
+                      &nbsp;&nbsp;&#125;
+                      <br />
+                      <br />
+                      &nbsp;&nbsp;
+                      <span className={styles.codeKeyword}>public fun</span>{" "}
+                      <span className={styles.codeFunc}>release_earnings</span>
+                      (deal: &Deal) &#123;
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      <span className={styles.codeComment}>
+                        // Atomic PTB payout
+                      </span>
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      <span className={styles.codeKeyword}>distribute</span>(
+                      deal.collaborators, deal.cuts);
+                      <br />
+                      &nbsp;&nbsp;&#125;
+                      <br />
+                      &#125;
+                    </code>
+                  </pre>
+                  <div className={styles.verifiedBadge}>
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      className={styles.checkIcon}
+                    >
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                    <span>Verified Contract</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Feature 2 */}
+            <motion.div
+              className={styles.featureRowReverse}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fadeUpVariant}
+            >
+              <div className={styles.featureText}>
+                <h3>Atomic, Simultaneous Payouts</h3>
+                <p>
+                  No one gets paid while someone else waits. The moment money hits the contract, every collaborator receives their exact cut simultaneously.
+                </p>
+              </div>
+              <div className={styles.featureVisual}>
                 <div className={styles.splitVisual}>
                   <div className={styles.splitInputNode}>
                     <span className={styles.splitTokenBadge}>USDC</span>
@@ -244,51 +315,6 @@ const LandingPage = () => {
               </div>
             </motion.div>
 
-            {/* Feature 2 */}
-            <motion.div
-              className={styles.featureRowReverse}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={fadeUpVariant}
-            >
-              <div className={styles.featureText}>
-                <h3>Atomic, Simultaneous Payouts</h3>
-                <p>
-                  No one gets paid while someone else waits. The moment money hits the contract, every collaborator receives their exact cut simultaneously.
-                </p>
-              </div>
-              <div className={styles.featureVisual}>
-                <div className={styles.routerVisual}>
-                  <div className={styles.tokenPills}>
-                    <span className={`${styles.tokenPill} ${styles.usdc}`}>
-                      USDC
-                    </span>
-                    <span className={`${styles.tokenPill} ${styles.eth}`}>
-                      ETH
-                    </span>
-                    <span className={`${styles.tokenPill} ${styles.sol}`}>
-                      SOL
-                    </span>
-                  </div>
-                  <div className={styles.routerHub}>
-                    <div className={styles.routerCore}>
-                      <div className={styles.pulseRing}></div>
-                      <span>Slyce Router</span>
-                    </div>
-                  </div>
-                  <div className={styles.routerDestinations}>
-                    <div className={styles.destNode}>
-                      <span>Collaboration A (50%)</span>
-                    </div>
-                    <div className={styles.destNode}>
-                      <span>Collaboration B (50%)</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
             {/* Feature 3 */}
             <motion.div
               className={styles.featureRow}
@@ -304,56 +330,28 @@ const LandingPage = () => {
                 </p>
               </div>
               <div className={styles.featureVisual}>
-                <div className={styles.codeVisual}>
-                  <div className={styles.codeHeader}>
-                    <span className={styles.codeDot}></span>
-                    <span className={styles.codeDot}></span>
-                    <span className={styles.codeDot}></span>
-                    <span className={styles.codeTitle}>SlyceSplit.sol</span>
+                <div className={styles.routerVisual}>
+                  <div className={styles.tokenPills}>
+                    <span className={`${styles.tokenPill} ${styles.usdc}`}>
+                      Google
+                    </span>
+                    <span className={`${styles.tokenPill} ${styles.eth}`}>
+                      Twitch
+                    </span>
+                    <span className={`${styles.tokenPill} ${styles.sol}`}>
+                      Apple
+                    </span>
                   </div>
-                  <pre className={styles.codeBody}>
-                    <code>
-                      <span className={styles.codeKeyword}>contract</span>{" "}
-                      SlyceSplit &#123;
-                      <br />
-                      &nbsp;&nbsp;
-                      <span className={styles.codeKeyword}>address</span>[]{" "}
-                      <span className={styles.codeVar}>payees</span>;<br />
-                      &nbsp;&nbsp;
-                      <span className={styles.codeKeyword}>uint256</span>[]{" "}
-                      <span className={styles.codeVar}>shares</span>;<br />
-                      <br />
-                      &nbsp;&nbsp;
-                      <span className={styles.codeKeyword}>function</span>{" "}
-                      <span className={styles.codeFunc}>splitFunds</span>(){" "}
-                      <span className={styles.codeKeyword}>public</span> &#123;
-                      <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;
-                      <span className={styles.codeComment}>
-                        // Verified Flow
-                      </span>
-                      <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;
-                      <span className={styles.codeKeyword}>distribute</span>(
-                      <span className={styles.codeVar}>payees</span>,{" "}
-                      <span className={styles.codeVar}>shares</span>);
-                      <br />
-                      &nbsp;&nbsp;&#125;
-                      <br />
-                      &#125;
-                    </code>
-                  </pre>
-                  <div className={styles.verifiedBadge}>
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      className={styles.checkIcon}
-                    >
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                    </svg>
-                    <span>Verified Contract</span>
+                  <div className={styles.routerHub}>
+                    <div className={styles.routerCore}>
+                      <div className={styles.pulseRing}></div>
+                      <span>zkLogin Auth</span>
+                    </div>
+                  </div>
+                  <div className={styles.routerDestinations}>
+                    <div className={styles.destNode}>
+                      <span>Secure Identity</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -467,9 +465,11 @@ const LandingPage = () => {
             <span className={styles.footerLink}>Discord</span>
             <span className={styles.footerLink}>GitHub</span>
           </div>
-          <Button variant="primary" onClick={() => navigate("/app")}>
-            Launch App
-          </Button>
+          {connection.isConnected && (
+            <Button variant="primary" onClick={() => navigate("/app")}>
+              Launch App
+            </Button>
+          )}
         </div>
       </footer>
 

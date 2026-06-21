@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, ArrowDownToLine } from "lucide-react";
+import { Plus, ArrowDownToLine, Copy } from "lucide-react";
 import Card from "../../components/card/Card";
 import SplitTable from "../../components/splitTable/SplitTable";
 import styles from "./Profile.module.css";
@@ -26,6 +26,13 @@ const Profile = () => {
     await dAppKit.disconnectWallet();
     toast.success("Wallet disconnected successfully");
     navigate("/");
+  };
+
+  const handleCopyAddress = () => {
+    if (currentAccount?.address) {
+      navigator.clipboard.writeText(currentAccount.address);
+      toast.success("Address copied to clipboard");
+    }
   };
 
   return (
@@ -72,6 +79,19 @@ const Profile = () => {
 
             <div className={styles.walletAddress}>
               {formatAddress(currentAccount?.address || "")}
+              <button
+                onClick={handleCopyAddress}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  marginLeft: "8px",
+                  color: "var(--text-accent)",
+                }}
+                title="Copy Address"
+              >
+                <Copy size={16} />
+              </button>
             </div>
 
             <div className={styles.walletFooter}>

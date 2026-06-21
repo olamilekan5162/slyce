@@ -109,7 +109,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </Button>
           )}
 
-          {facebookWallet && (
+          {/* {facebookWallet && (
             <Button
               variant="ghost"
               size="md"
@@ -123,7 +123,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               />
               <span>Continue with Facebook</span>
             </Button>
-          )}
+          )} */}
         </div>
 
         <p className={styles.legalText}>
