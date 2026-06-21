@@ -146,3 +146,20 @@
   background-color: #f3f4f6;
   color: #4b5563;
 }
+@media (max-width: 768px) {
+  .overview {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .balanceActions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .addFundsBtn,
+  .withdrawBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

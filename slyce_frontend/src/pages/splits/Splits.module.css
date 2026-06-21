@@ -126,3 +126,10 @@
   margin-top: auto;
   padding-top: 32px;
 }
+
+@media (max-width: 768px) {
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
