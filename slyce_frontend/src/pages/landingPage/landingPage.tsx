@@ -90,14 +90,13 @@ const LandingPage = () => {
           variants={staggerContainer}
         >
           <motion.h1 variants={fadeUpVariant} className={styles.heroTitle}>
-            Automate your earnings.
+            Collaborate now.
             <br />
-            Trustless revenue sharing.
+            Pay when you earn.
           </motion.h1>
           <motion.p variants={fadeUpVariant} className={styles.heroSubtitle}>
-            The modern protocol designed for creators, founders, and teams to
-            instantly split payments on-chain without middlemen or manual
-            accounting.
+            Make a credible offer to any professional without upfront cash.
+            Slyce replaces upfront payments with guaranteed on-chain agreements. Lock in their cut before the work begins. Paid automatically the moment earnings arrive.
           </motion.p>
           <motion.div variants={fadeUpVariant} className={styles.heroActions}>
             <Button
@@ -105,7 +104,7 @@ const LandingPage = () => {
               variant="primary"
               onClick={() => navigate("/app")}
             >
-              Start Splitting
+              Start Collaborating
             </Button>
             <Button
               size="lg"
@@ -158,10 +157,9 @@ const LandingPage = () => {
                 className={styles.useCaseImage}
               />
               <div className={styles.useCaseOverlay} />
-              <h3 className={styles.useCaseTitle}>Content Creators</h3>
+              <h3 className={styles.useCaseTitle}>Music & Audio</h3>
               <p className={styles.useCaseDesc}>
-                Automatically split ad revenue, sponsorships, and donations with
-                your team.
+                Secure top producers and featured artists by locking in their royalties before they step into the studio.
               </p>
             </motion.div>
 
@@ -172,10 +170,9 @@ const LandingPage = () => {
                 className={styles.useCaseImage}
               />
               <div className={styles.useCaseOverlay} />
-              <h3 className={styles.useCaseTitle}>Founders & Startups</h3>
+              <h3 className={styles.useCaseTitle}>Film & Video</h3>
               <p className={styles.useCaseDesc}>
-                Distribute company earnings trustlessly based on hardcoded
-                agreements.
+                Get directors, editors, and videographers on board by guaranteeing their cut of the final project's revenue.
               </p>
             </motion.div>
 
@@ -186,10 +183,9 @@ const LandingPage = () => {
                 className={styles.useCaseImage}
               />
               <div className={styles.useCaseOverlay} />
-              <h3 className={styles.useCaseTitle}>Music & Royalties</h3>
+              <h3 className={styles.useCaseTitle}>Indie Teams & Content</h3>
               <p className={styles.useCaseDesc}>
-                Streamline royalty payments for producers, artists, and labels.
-                No more waiting.
+                Build a world-class team of marketers and creators without a massive starting budget. Offer an undeniable promise.
               </p>
             </motion.div>
           </motion.div>
@@ -210,12 +206,10 @@ const LandingPage = () => {
               variants={fadeUpVariant}
             >
               <div className={styles.featureText}>
-                <h3>Trustless Execution</h3>
+                <h3>An Undeniable Promise (Code is Law)</h3>
                 <p>
-                  The protocol handles the money, not a middleman. Once a split
-                  contract is deployed, funds are distributed instantly and
-                  autonomously according to the predetermined percentages. No
-                  one can intercept or delay your earnings.
+                  It's not an IOU. Once a collaboration deal
+                  contract is deployed, it cannot be modified or ignored. Nobody needs to trust anyone—the protocol enforces the agreement.
                 </p>
               </div>
               <div className={styles.featureVisual}>
@@ -259,12 +253,9 @@ const LandingPage = () => {
               variants={fadeUpVariant}
             >
               <div className={styles.featureText}>
-                <h3>Multi-Token Routing</h3>
+                <h3>Atomic, Simultaneous Payouts</h3>
                 <p>
-                  Accept payments in USDC, ETH, or any supported ERC-20 token.
-                  The protocol automatically routes and splits the correct
-                  asset, allowing participants to withdraw exactly what they are
-                  owed without complex conversions.
+                  No one gets paid while someone else waits. The moment money hits the contract, every collaborator receives their exact cut simultaneously.
                 </p>
               </div>
               <div className={styles.featureVisual}>
@@ -288,10 +279,10 @@ const LandingPage = () => {
                   </div>
                   <div className={styles.routerDestinations}>
                     <div className={styles.destNode}>
-                      <span>Split A (50%)</span>
+                      <span>Collaboration A (50%)</span>
                     </div>
                     <div className={styles.destNode}>
-                      <span>Split B (50%)</span>
+                      <span>Collaboration B (50%)</span>
                     </div>
                   </div>
                 </div>
@@ -307,12 +298,9 @@ const LandingPage = () => {
               variants={fadeUpVariant}
             >
               <div className={styles.featureText}>
-                <h3>Verifiable on-chain</h3>
+                <h3>No Crypto Knowledge Required</h3>
                 <p>
-                  Every split deployed is a completely transparent, verifiable
-                  smart contract. Participants can independently audit the code,
-                  ensuring the allocations match exactly what was agreed upon
-                  before any funds are deposited.
+                  Skip the wallet setup. Collaborators can join and securely sign agreements using just their Google account via zkLogin.
                 </p>
               </div>
               <div className={styles.featureVisual}>
@@ -385,9 +373,9 @@ const LandingPage = () => {
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeUpVariant}
           >
-            <h2 className={styles.sectionTitle}>The Lifecycle of a Split</h2>
+            <h2 className={styles.sectionTitle}>How It Works</h2>
             <p className={styles.sectionSubtitle}>
-              Five automated steps from creation to withdrawal.
+              From making the offer to getting paid.
             </p>
           </motion.div>
 
@@ -396,24 +384,24 @@ const LandingPage = () => {
 
             {[
               {
-                title: "Create a Split",
-                desc: "Deploy a new smart contract that serves as your shared treasury address.",
+                title: "Make the Offer",
+                desc: "Start a collaboration and assign percentage cuts to your team.",
               },
               {
-                title: "Add Collaborators",
-                desc: "Input wallet addresses and assign precise percentage allocations.",
+                title: "Lock the Agreement",
+                desc: "Collaborators review the deal and confirm participation with one click.",
               },
               {
-                title: "Share Address",
-                desc: "Provide your new split address to sponsors, platforms, or customers.",
+                title: "Start Creating",
+                desc: "Focus on the work, knowing the financial agreement is set in stone.",
               },
               {
-                title: "Receive Funds",
-                desc: "Payments arrive and are instantly accounted for in the contract logic.",
+                title: "Earnings Arrive",
+                desc: "The project goes live and starts generating revenue.",
               },
               {
-                title: "Auto-Withdraw",
-                desc: "Participants securely claim their exact share directly to their wallets.",
+                title: "Automatic Payout",
+                desc: "Everyone receives their exact cut to their wallet at the exact same time.",
               },
             ].map((step, idx) => (
               <motion.div

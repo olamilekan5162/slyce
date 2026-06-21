@@ -164,7 +164,7 @@ export default function AddSplit() {
 
     if (isEdit) {
       if (!id) return;
-      const toastId = toast.loading("Updating split...");
+      const toastId = toast.loading("Updating collaboration...");
       try {
         const distType = getDistType();
         const result = await updateSplit(
@@ -185,7 +185,7 @@ export default function AddSplit() {
         );
         setCreatedSplitId(result.splitId);
         setInvitePasscodes(result.passcodes);
-        toast.success("Split updated successfully", { id: toastId });
+        toast.success("Collaboration updated successfully", { id: toastId });
       } catch (err: any) {
         console.log(err);
         toast.error(err.message, { id: toastId });
@@ -193,7 +193,7 @@ export default function AddSplit() {
       return;
     }
 
-    const toastId = toast.loading("Creating split...");
+    const toastId = toast.loading("Starting collaboration...");
 
     try {
       const distType = getDistType();
@@ -211,7 +211,7 @@ export default function AddSplit() {
       });
       setCreatedSplitId(result.splitId);
       setInvitePasscodes(result.passcodes);
-      toast.success("Split created successfully", {
+      toast.success("Collaboration started successfully", {
         id: toastId,
       });
     } catch (err: any) {
@@ -229,14 +229,14 @@ export default function AddSplit() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.pageTitle}>
-            {isEdit ? "Split Updated!" : "Split Created!"}
+            {isEdit ? "Collaboration Updated!" : "Collaboration Started!"}
           </h1>
           <p className={styles.pageSubtitle}>
             {isEdit
               ? inviteRecipients.length > 0
-                ? "Your split has been successfully updated. Share these invites with your new participants."
-                : "Your split has been successfully updated."
-              : "Your split is live on testnet. Share these invites."}
+                ? "Your collaboration has been successfully updated. Share these invites with your new collaborators."
+                : "Your collaboration has been successfully updated."
+              : "Your collaboration is live on testnet. Share these invites."}
           </p>
         </div>
 
@@ -260,7 +260,7 @@ export default function AddSplit() {
                       </div>
                       <div className={styles.inviteDetails}>
                         <span className={styles.inviteName}>
-                          {r.address ? (r.address.startsWith("0x") ? `${r.address.slice(0,6)}...${r.address.slice(-4)}` : r.address) : `Recipient ${originalIndex + 1}`}
+                          {r.address ? (r.address.startsWith("0x") ? `${r.address.slice(0,6)}...${r.address.slice(-4)}` : r.address) : `Collaborator ${originalIndex + 1}`}
                         </span>
                         <span className={styles.inviteRole}>
                           {r.share}% Share
@@ -300,7 +300,7 @@ export default function AddSplit() {
             style={{ display: "flex", justifyContent: "center", marginTop: 32 }}
           >
             <Button variant="primary" onClick={() => window.history.back()}>
-              Return to Splits
+              Return to Collaborations
             </Button>
           </div>
         )}
@@ -312,10 +312,10 @@ export default function AddSplit() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.pageTitle}>
-          {isEdit ? "Edit Split" : "Add New Split"}
+          {isEdit ? "Edit Collaboration" : "Start New Collaboration"}
         </h1>
         <p className={styles.pageSubtitle}>
-          Configure automated asset distribution and participant shares.
+          Configure automated asset routing and collaborator shares.
         </p>
       </div>
 
@@ -323,10 +323,10 @@ export default function AddSplit() {
         <Card variant="light" className={styles.formCard}>
           <div className={styles.topRowGrid}>
             <div className={styles.inputGroup}>
-              <label className={styles.label}>Split Name</label>
+              <label className={styles.label}>Collaboration Name</label>
               <input
                 type="text"
-                placeholder="e.g. Q3 Operations Split"
+                placeholder="e.g. Q3 Operations Collaboration"
                 value={splitName}
                 onChange={(e) => setSplitName(e.target.value)}
                 className={styles.textInput}
@@ -487,7 +487,7 @@ export default function AddSplit() {
             </div>
             <div className={styles.totalSplitWrapper}>
               <div className={styles.totalSplitContainer}>
-                <span className={styles.totalSplitLabel}>Total Split</span>
+                <span className={styles.totalSplitLabel}>Total Cut</span>
                 <div className={styles.progressBarTrack}>
                   <div
                     className={`${styles.progressBarFill} ${
@@ -512,7 +512,7 @@ export default function AddSplit() {
           </div>
 
           <div className={styles.engineSection}>
-            <label className={styles.label}>Distribution Engine</label>
+            <label className={styles.label}>Payout Engine</label>
             <div className={styles.engineSelectWrapper}>
               <select
                 value={distributionEngine}
@@ -549,7 +549,7 @@ export default function AddSplit() {
             )}
             {distributionEngine === "Scheduled Trigger" && (
               <div className={styles.engineFieldGroup}>
-                <label className={styles.label}>Distribution Interval</label>
+                <label className={styles.label}>Payout Interval</label>
                 <div className={styles.engineSelectWrapper}>
                   <select
                     value={scheduledInterval}
@@ -567,7 +567,7 @@ export default function AddSplit() {
               </div>
             )}
             <p className={styles.helperText}>
-              Funds will be automatically routed as soon as they hit the split
+              Funds will be automatically routed as soon as they hit the collaboration deal
               wallet address.
             </p>
           </div>
@@ -588,7 +588,7 @@ export default function AddSplit() {
                   : "Creating..."
                 : isEdit
                 ? "Save Changes"
-                : "Add Split"}
+                : "Start Collaboration"}
             </span>
           </Button>
         </Card>

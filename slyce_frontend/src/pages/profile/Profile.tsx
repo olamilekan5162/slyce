@@ -76,7 +76,7 @@ const Profile = () => {
 
             <div className={styles.walletFooter}>
               <div className={styles.totalSplitsStack}>
-                <span className={styles.cardLabel}>Total Splits</span>
+                <span className={styles.cardLabel}>Total Collaborations</span>
                 <span className={styles.splitsCount}>
                   {splitsLoading ? "..." : splits?.length}
                 </span>

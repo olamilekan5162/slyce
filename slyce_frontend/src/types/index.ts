@@ -83,6 +83,7 @@ export interface Activity {
   title: string;
   sender?: string;
   amount: string;
+  usdValue: number;
   date: string;
   time: string;
   status: "Completed" | "Failed" | "Pending";

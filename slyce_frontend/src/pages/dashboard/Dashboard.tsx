@@ -16,7 +16,7 @@ const Dashboard = () => {
   const currentAccount = useCurrentAccount();
   const { totalBalance } = useBalances(currentAccount?.address);
   const { splits } = useFetchSplits(false);
-  const { transactions: activityList, loading: loadingActivities } =
+  const { transactions: activityList, totalIncome, loading: loadingActivities } =
     useFetchTransactions();
   const lastSplit = splits?.at(-1);
 
@@ -37,7 +37,7 @@ const Dashboard = () => {
           onClick={() => navigate("/app/splits/new")}
         >
           <Plus size={16} />
-          <span>Add New Split</span>
+          <span>Start a Collaboration</span>
         </Button>
       </div>
 
@@ -50,7 +50,9 @@ const Dashboard = () => {
 
         <Card variant="light" className={styles.statsCard}>
           <div className={styles.statsLabel}>Income</div>
-          <div className={styles.statsAmount}>$3,814.25</div>
+          <div className={styles.statsAmount}>
+            ${totalIncome.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
         </Card>
 
         <Card variant="light" className={styles.statsCard}>
@@ -65,7 +67,7 @@ const Dashboard = () => {
         <div className={styles.leftColumn}>
           <Card variant="light">
             <div className={styles.sectionHeader}>
-              <h3>Recent Split</h3>
+              <h3>Recent Collaboration</h3>
               <a href="#" className={styles.seeAllLink}>
                 See Details <ChevronRight size={14} />
               </a>
@@ -78,7 +80,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <div className={styles.splitTotalLabel}>
-                    Total Distributed
+                    Total Paid Out
                   </div>
                   <div className={styles.splitTotalAmount}>
                     ${lastSplit?.totalUsd || 0}
@@ -94,7 +96,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className={`${styles.detailCol} ${styles.borderBlue}`}>
-                  <div className={styles.detailLabel}>Distribution Type</div>
+                  <div className={styles.detailLabel}>Payout Type</div>
                   <div className={styles.detailValue}>
                     {getDistType(Number(lastSplit?.distributionType))}
                   </div>

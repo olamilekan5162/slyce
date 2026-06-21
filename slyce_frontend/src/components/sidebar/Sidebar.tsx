@@ -17,7 +17,7 @@ const links = [
     path: "/app/transactions",
   },
   {
-    label: "Splits",
+    label: "Collaborations",
     icon: Wallet,
     path: "/app/splits",
   },

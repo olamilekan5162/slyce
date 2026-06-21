@@ -4,12 +4,14 @@ import { useCurrentAccount, useCurrentClient } from "@mysten/dapp-kit-react";
 import { useEffect, useRef, useState } from "react";
 import { graphqlClient } from "../lib/suiClient";
 import { getPackageId } from "../lib/contract";
+import { getTokenPrice } from "../lib/helpers";
 import type { Activity } from "../types";
 
 export function useFetchTransactions() {
   const currentAccount = useCurrentAccount();
   const client = useCurrentClient();
   const [transactions, setTransactions] = useState<Activity[]>([]);
+  const [totalIncome, setTotalIncome] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchingRef = useRef(false);
@@ -53,7 +55,6 @@ export function useFetchTransactions() {
 
         for (const node of nodes) {
           const json = node.contents?.json;
-          console.log(json);
 
           if (!json) continue;
 
@@ -105,6 +106,9 @@ export function useFetchTransactions() {
             maximumFractionDigits: Math.min(decimals, 4),
           })} ${symbol}`;
 
+          const { price: priceUsd } = await getTokenPrice(coinType ?? "");
+          const usdValue = formattedValue * priceUsd;
+
           const timestamp = node.timestamp;
           const date = timestamp
             ? new Date(timestamp).toLocaleDateString("en-US", {
@@ -127,13 +131,16 @@ export function useFetchTransactions() {
             title: formattedSplitId,
             sender: splitId,
             amount: formattedAmount,
+            usdValue,
             date,
             time,
             status: "Completed",
           });
         }
 
+        const total = activities.reduce((sum, a) => sum + a.usdValue, 0);
         setTransactions(activities);
+        setTotalIncome(total);
         setLoading(false);
         fetchingRef.current = false;
       })
@@ -147,5 +154,5 @@ export function useFetchTransactions() {
       });
   }, [currentAccount?.address, client]);
 
-  return { transactions, loading, error };
+  return { transactions, totalIncome, loading, error };
 }

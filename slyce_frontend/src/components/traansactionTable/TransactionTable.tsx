@@ -68,7 +68,7 @@ const TransactionTable = ({
                 <select className={styles.select}>
                   <option>All Transactions</option>
                   <option>Receive</option>
-                  <option>Split</option>
+                  <option>Collaboration</option>
                 </select>
               </div>
             </div>
@@ -78,7 +78,7 @@ const TransactionTable = ({
 
       {!isDashboard && (
         <div className={styles.tableHeader}>
-          <div>Sender / Recipient</div>
+          <div>Sender / Collaborator</div>
           <div>Category</div>
           <div>Transaction Date</div>
           <div className={styles.headerAmount}>Amount</div>

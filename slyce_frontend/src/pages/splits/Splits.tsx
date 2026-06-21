@@ -24,37 +24,37 @@ const Splits = () => {
   return (
     <div className={styles.dashboard}>
       <div className={styles.sectionHeader}>
-        <h1 className={styles.pageTitle}>Splits</h1>
+        <h1 className={styles.pageTitle}>Collaborations</h1>
         <Button
           variant="primary"
           className={styles.actionBtn}
           onClick={() => navigate("/app/splits/new")}
         >
           <PlusIcon />
-          Add new split
+          Start a collaboration
         </Button>
       </div>
 
       {loading ? (
-        <LoadingState message="Loading your splits..." />
+        <LoadingState message="Loading your collaborations..." />
       ) : error ? (
         <EmptyState
           icon={<LayoutGrid size={32} />}
-          title="Error loading splits"
+          title="Error loading collaborations"
           description={error}
         />
       ) : splits.length === 0 ? (
         <EmptyState
           icon={<LayoutGrid size={32} />}
-          title="No splits found"
-          description="You haven't joined or created any splits yet."
+          title="No collaborations found"
+          description="You haven't joined or created any collaborations yet."
           action={
             <Button
               variant="primary"
               onClick={() => navigate("/app/splits/new")}
             >
               <PlusIcon size={18} style={{ marginRight: 8 }} />
-              Create your first split
+              Create your first collaboration
             </Button>
           }
         />

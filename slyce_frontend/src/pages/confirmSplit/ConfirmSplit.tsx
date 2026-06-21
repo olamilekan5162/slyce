@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useCallback, useEffect } from "react";
 import Button from "../../components/button/Button";
 import LoginModal from "../../components/loginModal/LoginModal";
@@ -32,9 +33,12 @@ export default function ConfirmSplit() {
 
   // Auto-fill passcode from URL param on mount
   useEffect(() => {
-    if (urlCode && urlCode.length === PASSCODE_LENGTH) {
-      setPasscode(urlCode.toUpperCase().split(""));
-    }
+    const initialize = async () => {
+      if (urlCode && urlCode.length === PASSCODE_LENGTH) {
+        setPasscode(urlCode.toUpperCase().split(""));
+      }
+    };
+    initialize();
   }, [urlCode]);
 
   // Find the recipient index for the connected wallet
@@ -119,7 +123,9 @@ export default function ConfirmSplit() {
     const code = passcode.join("");
     if (code.length !== PASSCODE_LENGTH) return;
     if (!id || recipientIndex < 0) {
-      toast.error("Could not find your recipient slot in this split.");
+      toast.error(
+        "Could not find your collaborator slot in this collaboration.",
+      );
       return;
     }
 
@@ -130,7 +136,7 @@ export default function ConfirmSplit() {
       const passcodeBytes = Array.from(encoder.encode(code));
 
       await confirmSplit(id, recipientIndex, passcodeBytes);
-      toast.success("Split confirmed successfully!", { id: toastId });
+      toast.success("Collaboration confirmed successfully!", { id: toastId });
       setIsConfirmed(true);
     } catch (err: any) {
       toast.error(err.message ?? "Confirmation failed", { id: toastId });
@@ -160,7 +166,7 @@ export default function ConfirmSplit() {
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
             </div>
-            <h2 className={styles.successTitle}>Split Confirmed!</h2>
+            <h2 className={styles.successTitle}>Collaboration Confirmed!</h2>
             <p className={styles.successDesc}>
               You've confirmed your {myShare}% share in{" "}
               <strong>{split?.name}</strong>.
@@ -180,11 +186,11 @@ export default function ConfirmSplit() {
         </div>
 
         {loading ? (
-          <LoadingState message="Loading split details..." />
+          <LoadingState message="Loading collaboration details..." />
         ) : !split ? (
           <div className={styles.inviteBody}>
             <p className={styles.inviteSubtext}>
-              This split could not be found or has been cancelled.
+              This collaboration could not be found or has been cancelled.
             </p>
           </div>
         ) : (
@@ -193,7 +199,7 @@ export default function ConfirmSplit() {
             <div className={styles.inviteBody}>
               <div className={styles.inviteText}>
                 <h1 className={styles.inviteHeading}>
-                  You've been added to a split
+                  You've been added to a collaboration
                 </h1>
                 <p className={styles.inviteSubtext}>
                   Review the details below and confirm your participation.
@@ -291,7 +297,8 @@ export default function ConfirmSplit() {
               ) : myRecipient && (myRecipient as any).confirmed ? (
                 <div className={styles.connectBlock}>
                   <p className={styles.connectDesc}>
-                    You have already confirmed your participation in this split.
+                    You have already confirmed your participation in this
+                    collaboration.
                   </p>
                 </div>
               ) : (
@@ -326,7 +333,7 @@ export default function ConfirmSplit() {
                     onClick={handleConfirm}
                     disabled={!isPasscodeComplete}
                   >
-                    Confirm Split
+                    Confirm Collaboration
                   </Button>
                 </div>
               )}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import Card from "../card/Card";
 import styles from "./SplitTable.module.css";
@@ -24,12 +25,12 @@ const SplitTable = ({
   return (
     <Card variant="light" className={styles.tableCard}>
       <div className={styles.sectionHeader}>
-        <h3>My Splits</h3>
+        <h3>My Collaborations</h3>
         <div className={styles.toolbar}>
           <div className={styles.searchWrapper}>
             <input
               type="text"
-              placeholder="Search splits"
+              placeholder="Search collaborations"
               className={styles.searchInput}
             />
           </div>
@@ -45,14 +46,14 @@ const SplitTable = ({
       </div>
 
       <div className={styles.tableHeader}>
-        <div>Split Title</div>
+        <div>Collaboration Title</div>
         <div>Creator</div>
-        <div className={styles.headerAmount}>Distributed</div>
+        <div className={styles.headerAmount}>Paid Out</div>
       </div>
 
       <div className={styles.transactionsList}>
         {loading ? (
-          <LoadingState message="Loadng splits..." />
+          <LoadingState message="Loading collaborations..." />
         ) : (
           displayedSplits.map((split: any) => (
             <div key={split.id} className={styles.transactionItem}>

@@ -26,16 +26,16 @@ export default function SplitDetails() {
 
   const handleCopyAddress = () => {
     navigator.clipboard.writeText(split?.id || "");
-    toast.success("Split address copied to clipboard!");
+    toast.success("Collaboration address copied to clipboard!");
   };
 
   const handleDistribute = async (splitId: string) => {
-    const toastId = toast.loading("Distributing split...");
+    const toastId = toast.loading("Releasing earnings...");
     try {
       await distributeVault(splitId);
-      toast.success("Split distributed successfully!", { id: toastId });
+      toast.success("Earnings released successfully!", { id: toastId });
     } catch (err: any) {
-      toast.error(err.message ?? "Distribution failed", { id: toastId });
+      toast.error(err.message ?? "Payout failed", { id: toastId });
     }
   };
 
@@ -43,7 +43,7 @@ export default function SplitDetails() {
     <div className={styles.container}>
       <div className={styles.headerRow}>
         <div className={styles.titleArea}>
-          <h1 className={styles.pageTitle}>Split Details</h1>
+          <h1 className={styles.pageTitle}>Collaboration Details</h1>
           <p className={styles.pageSubtitle}>{split?.name}</p>
         </div>
 
@@ -53,7 +53,7 @@ export default function SplitDetails() {
             className={styles.editBtn}
             onClick={() => navigate(`/app/splits/${split?.id}/edit`)}
           >
-            <span>Edit Split</span>
+            <span>Edit Collaboration</span>
           </Button>
           {/* <Button
             variant="primary"
@@ -66,7 +66,7 @@ export default function SplitDetails() {
       </div>
 
       {loading ? (
-        <LoadingState message="Loading split detail.." />
+        <LoadingState message="Loading collaboration details..." />
       ) : (
         <div className={styles.detailsGrid}>
           <div className={styles.leftColumn}>
@@ -142,13 +142,12 @@ export default function SplitDetails() {
               {Number(split?.confirmedCount) !==
               Number(split?.recipients.length) ? (
                 <p className={styles.configDescription}>
-                  Waiting for all participants to confirm the current split
-                  ratios before activating.
+                  Waiting for all participants to confirm the current collaboration deal before activating.
                 </p>
               ) : (
                 <p className={styles.configDescription}>
-                  All participants have confirmed the current split ratios. You
-                  can now distribute the payment.
+                  All participants have confirmed the current agreed cuts. You
+                  can now release earnings according to the agreement.
                 </p>
               )}
 
@@ -165,7 +164,7 @@ export default function SplitDetails() {
                 <h4 className={styles.specTitle}>TECHNICAL SPECIFICATIONS</h4>
 
                 <div className={styles.specRow}>
-                  <span className={styles.specLabel}>Split Address</span>
+                  <span className={styles.specLabel}>Collaboration Address</span>
                   <button
                     onClick={handleCopyAddress}
                     className={styles.copyAddressBtn}
@@ -183,7 +182,7 @@ export default function SplitDetails() {
                 </div>
 
                 <div className={styles.specRow}>
-                  <span className={styles.specLabel}>Distribution Engine</span>
+                  <span className={styles.specLabel}>Payout Engine</span>
                   <span className={styles.engineBadge}>
                     {getDistType(Number(split?.distributionType))}
                   </span>
@@ -196,7 +195,7 @@ export default function SplitDetails() {
                         variant="primary"
                         onClick={() => handleDistribute(split?.id || "")}
                       >
-                        Distribute Split
+                        Release Earnings
                       </Button>
                     )}
                 </div>
