@@ -850,8 +850,10 @@
   color: #fff;
 }
 
-/* Responsive updates */
+/* ─── Responsive ─────────────────────────────── */
+
 @media (max-width: 1024px) {
+  /* Layout */
   .featureRow,
   .featureRowReverse {
     grid-template-columns: 1fr;
@@ -861,6 +863,10 @@
   .featureRowReverse .featureText,
   .featureRowReverse .featureVisual {
     order: initial;
+  }
+
+  .featuresWrapper {
+    gap: 6rem;
   }
 
   .timelineLine {
@@ -883,29 +889,179 @@
     margin: 0;
     width: 100%;
   }
-}
 
-@media (max-width: 768px) {
+  /* Typography */
   .heroTitle {
+    font-size: 3.75rem;
+  }
+
+  .sectionTitle {
+    font-size: 2.5rem;
+  }
+
+  .featureText h3 {
+    font-size: 2.25rem;
+  }
+
+  .vaultContent h2 {
     font-size: 3rem;
   }
 
+  /* Spacing */
+  .header {
+    padding: 1.5rem 2.5rem;
+  }
+
+  .section {
+    padding: 6rem 2.5rem;
+  }
+
+  .vaultBanner {
+    padding: 6rem 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Navbar */
+  .header {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  /* Hero */
+  .heroTitle {
+    font-size: 2.5rem;
+    letter-spacing: -0.03em;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .heroActions {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .heroActions button,
+  .heroActions a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Sections */
+  .section {
+    padding: 4rem 1.5rem;
+  }
+
+  .sectionHeader {
+    margin-bottom: 3rem;
+  }
+
+  .sectionTitle {
+    font-size: 2rem;
+  }
+
+  .sectionSubtitle {
+    font-size: 1rem;
+  }
+
+  /* Use cases */
   .useCasesGrid {
     grid-template-columns: 1fr;
   }
 
-  .section {
-    padding: 4rem 2rem;
+  .useCaseCard {
+    height: 300px;
+  }
+
+  .useCaseTitle {
+    font-size: 1.4rem;
+  }
+
+  /* Features */
+  .featuresWrapper {
+    gap: 4rem;
+  }
+
+  .featureText h3 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .featureText p {
+    font-size: 1rem;
+  }
+
+  /* Timeline */
+  .timelineCard {
+    padding: 1.75rem;
+  }
+
+  .timelineCard h3 {
+    font-size: 1.25rem;
+  }
+
+  /* Vault/CTA */
+  .vaultBanner {
+    padding: 5rem 1.5rem;
   }
 
   .vaultContent h2 {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
   }
 
+  .vaultContent p {
+    font-size: 1rem;
+  }
+
+  /* Footer */
   .footerMain {
     flex-direction: column;
     gap: 2rem;
     text-align: center;
+  }
+
+  .footerLinks {
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .heroSubtitle {
+    font-size: 0.95rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.75rem;
+  }
+
+  .featureText h3 {
+    font-size: 1.5rem;
+  }
+
+  .vaultContent h2 {
+    font-size: 1.85rem;
+  }
+
+  .useCaseCard {
+    height: 260px;
+    padding: 1.75rem;
+  }
+
+  .timelineCard {
+    padding: 1.25rem;
   }
 }
 
